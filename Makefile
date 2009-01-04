@@ -4,31 +4,30 @@ include config.mk
 CFLAGS += -fPIC
 CXXFLAGS += -fPIC
 
-default: tripgraph.py _tripgraph.so libroutez.so testgraph
+default: python/tripgraph.py python/_tripgraph.so libroutez.so \
+	examples/testgraph
 
 config.mk:
 	@echo "Please run ./configure. Stop."
 	@exit 1
 
 %.o: %.cc
-	g++ $< -c -o $@ $(CXXFLAGS) $(PYTHON_CFLAGS) $(RUBY_CFLAGS) -g
+	g++ $< -c -o $@ $(CXXFLAGS) $(PYTHON_CFLAGS) $(RUBY_CFLAGS) -I./include -g
 
 %.o: %.cc %.h
-	g++ $< -c -o $@ $(CXXFLAGS) $(PYTHON_CFLAGS) $(RUBY_CFLAGS) -g
+	g++ $< -c -o $@ $(CXXFLAGS) $(PYTHON_CFLAGS) $(RUBY_CFLAGS) -I./include -g
 
-TRIPGRAPH_OBJECTS=tripgraph.o trippath.o tripstop.o 
+TRIPGRAPH_OBJECTS=lib/tripgraph.o lib/trippath.o lib/tripstop.o 
 
 # libroutez: the main library
 libroutez.so: $(TRIPGRAPH_OBJECTS)
 	g++ $(TRIPGRAPH_OBJECTS) -shared -o libroutez.so -fPIC -g
 
-# tripgraph_py.py/_tripgraph_py.so: the python library
-# FIXME: rename to routez/_routez.so when we move this guy out of the
-# main django directory
-tripgraph.py tripgraph_wrap_py.cc: tripgraph.i
-	swig -c++ -python -o tripgraph_wrap_py.cc $<
-_tripgraph.so: libroutez.so tripgraph_wrap_py.o
-	g++ -shared -o _tripgraph.so tripgraph_wrap_py.o libroutez.so $(PYTHON_LDFLAGS) -fPIC
+# python bindings
+python/tripgraph.py python/tripgraph_wrap_py.cc: tripgraph.i
+	swig -c++ -python -I./include -o python/tripgraph_wrap_py.cc $<
+python/_tripgraph.so: libroutez.so python/tripgraph_wrap_py.o
+	g++ -shared -o $@ python/tripgraph_wrap_py.o libroutez.so $(PYTHON_LDFLAGS) -fPIC
 
 # tripgraph_rb.so: the ruby library
 
@@ -39,8 +38,9 @@ _tripgraph.so: libroutez.so tripgraph_wrap_py.o
 #	g++ -shared -o tripgraph.so tripgraph_wrap_rb.o libroutez.so $(RUBY_LDFLAGS) -fPIC
 
 # stupid test program
-testgraph: testgraph.cc libroutez.so
-	g++ testgraph.cc -o testgraph libroutez.so -fPIC -g
+examples/testgraph: examples/testgraph.cc libroutez.so
+	g++ $< -o $@ libroutez.so -fPIC -g -I./include
 
 clean:
-	rm -f _tripgraph.so *.o testgraph tripgraph.py tripgraph_wrap_py.cc *~
+	rm -f lib/*.o examples/testgraph \
+	python/_tripgraph.so python/tripgraph.py python/tripgraph_wrap_py.cc 
