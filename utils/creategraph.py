@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
 import transitfeed
-import osm
+import routez.osm as osm
 import sys
-from tripgraph import *
+from routez.tripgraph import *
 
 def load_gtfs(tripgraph, sched):
     stops = sched.GetStopList()
