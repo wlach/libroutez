@@ -22,9 +22,9 @@ def load_gtfs(tripgraph, sched):
           # stupid side-effect of google's transit feed python script being broken
           if int(secs) < int(prevsecs):
             print "WARNING: Negative edge in gtfs. This probably means you "
-            "need to a more recent version of the google transit feed "
+            "need a more recent version of the google transit feed " 
             "package (see README)"
-                                                                                          secs, prevsecs, prevstop.stop_id, stop.stop_id)
+
           #print "Adding triphop %s %s %s->%s" % (trip.trip_id, trip.trip_headsign, prevstop.stop_id, stop.stop_id)
           tripgraph.add_triphop(prevsecs, secs, str("gtfs"+prevstop.stop_id),
                                 str("gtfs"+stop.stop_id), int(trip.route_id), 
