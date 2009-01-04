@@ -1,11 +1,13 @@
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.57)
 AC_INIT(libroutez)
+AC_CONFIG_SRCDIR(lib/tripgraph.cc)
 
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_CPP
 AC_PROG_CXXCPP
+AC_PROG_INSTALL
 AX_PYTHON
 AX_WITH_RUBY
 AX_RUBY_DEVEL

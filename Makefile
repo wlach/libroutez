@@ -1,11 +1,13 @@
 include config.mk
 
+default: python/tripgraph.py python/_tripgraph.so libroutez.so \
+	examples/testgraph
+
+include install.mk
+
 # Always always compile with fPIC
 CFLAGS += -fPIC
 CXXFLAGS += -fPIC
-
-default: python/tripgraph.py python/_tripgraph.so libroutez.so \
-	examples/testgraph
 
 config.mk:
 	@echo "Please run ./configure. Stop."
