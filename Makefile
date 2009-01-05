@@ -1,7 +1,8 @@
 include config.mk
 
-default: python/routez/tripgraph.py python/routez/_tripgraph.so libroutez.so \
-	examples/testgraph
+default:  libroutez.so examples/testgraph \
+	python/routez/tripgraph.py python/routez/_tripgraph.so \
+	ruby/routez.so
 
 include install.mk
 
@@ -31,13 +32,12 @@ python/routez/tripgraph.py python/routez/tripgraph_wrap_py.cc: tripgraph.i
 python/routez/_tripgraph.so: libroutez.so python/routez/tripgraph_wrap_py.o
 	g++ -shared -o $@ python/routez/tripgraph_wrap_py.o libroutez.so $(PYTHON_LDFLAGS) -fPIC
 
-# tripgraph_rb.so: the ruby library
+# ruby bindings
+ruby/routez_wrap_rb.cc: routez.i tripgraph.i 
+	swig -c++ -ruby -I./include  -o $@ $<
 
-#tripgraph_wrap_rb.cc: tripgraph.i
-# commented out until I can get seperate things out
-#	swig -c++ -ruby -o tripgraph_wrap_rb.cc $<
-#tripgraph.so: libroutez.so tripgraph_wrap_rb.o
-#	g++ -shared -o tripgraph.so tripgraph_wrap_rb.o libroutez.so $(RUBY_LDFLAGS) -fPIC
+ruby/routez.so: libroutez.so ruby/routez_wrap_rb.o
+	g++ -shared -o ruby/routez.so ruby/routez_wrap_rb.o libroutez.so $(RUBY_LDFLAGS) -I./include -fPIC
 
 # stupid test program
 examples/testgraph: examples/testgraph.cc libroutez.so

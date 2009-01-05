@@ -9,5 +9,12 @@ install-python: python/routez/_tripgraph.so python/routez/tripgraph.py
 	$(INSTALL) python/routez/osm.py $(DESTDIR)$(libdir)/python/routez
 	$(INSTALL) python/routez/_tripgraph.so $(DESTDIR)$(libdir)/python/routez
 	$(INSTALL) python/routez/tripgraph.py $(DESTDIR)$(libdir)/python/routez
+	$(INSTALL) python/routez/__init__.py $(DESTDIR)$(libdir)/python/routez
+
+# likewise, this is a very non idiomatic way of installing a ruby module...
+install-ruby:
+	$(INSTALL) -d $(DESTDIR)$(libdir)/ruby
+	$(INSTALL) ruby/routez.so $(DESTDIR)$(libdir)/ruby
+
 
 install: install-libroutez install-python
