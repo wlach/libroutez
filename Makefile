@@ -1,7 +1,7 @@
 include config.mk
 
 default:  libroutez.so examples/testgraph \
-	python/routez/tripgraph.py python/routez/_tripgraph.so \
+	python/libroutez/tripgraph.py python/libroutez/_tripgraph.so \
 	ruby/routez.so
 
 include install.mk
@@ -27,10 +27,10 @@ libroutez.so: $(TRIPGRAPH_OBJECTS)
 	g++ $(TRIPGRAPH_OBJECTS) -shared -o libroutez.so -fPIC -g
 
 # python bindings
-python/routez/tripgraph.py python/routez/tripgraph_wrap_py.cc: tripgraph.i
-	swig -c++ -python -I./include -o python/routez/tripgraph_wrap_py.cc $<
-python/routez/_tripgraph.so: libroutez.so python/routez/tripgraph_wrap_py.o
-	g++ -shared -o $@ python/routez/tripgraph_wrap_py.o libroutez.so $(PYTHON_LDFLAGS) -fPIC
+python/libroutez/tripgraph.py python/libroutez/tripgraph_wrap_py.cc: tripgraph.i
+	swig -c++ -python -I./include -o python/libroutez/tripgraph_wrap_py.cc $<
+python/libroutez/_tripgraph.so: libroutez.so python/libroutez/tripgraph_wrap_py.o
+	g++ -shared -o $@ python/libroutez/tripgraph_wrap_py.o libroutez.so $(PYTHON_LDFLAGS) -fPIC
 
 # ruby bindings
 ruby/routez_wrap_rb.cc: routez.i tripgraph.i 
@@ -45,6 +45,6 @@ examples/testgraph: examples/testgraph.cc libroutez.so
 
 clean:
 	rm -f *.so lib/*.o python/*.pyc */*.pyc examples/testgraph \
-	python/routez/_tripgraph.so python/routez/tripgraph.py \
-	python/routez/tripgraph_wrap_py.cc python/routez/*.o \
+	python/libroutez/_tripgraph.so python/libroutez/tripgraph.py \
+	python/libroutez/tripgraph_wrap_py.cc python/libroutez/*.o \
 	ruby/routez.so ruby/*.o ruby/routez_wrap_rb.cc \

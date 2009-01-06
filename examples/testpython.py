@@ -5,10 +5,10 @@
 
 # FIXME: flesh this out a bit more
 
-import routez.tripgraph
+import libroutez.tripgraph
 
 if __name__ == '__main__':
-    g = routez.tripgraph.TripGraph()
+    g = libroutez.tripgraph.TripGraph()
 
     g.add_tripstop("gtfs1", "gtfs", 0.0, 0.0)
     g.add_tripstop("gtfs2", "gtfs", 0.5, 0.0)
