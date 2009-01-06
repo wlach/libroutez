@@ -9,10 +9,11 @@ config.mk
 config.status
 configure
 libroutez.so
-libroutez.so
-python/tripgraph.py
-python/tripgraph_wrap_py.cc
-python/_tripgraph.so
-ruby/tripgraph_wrap_rb.cc
+python/routez/tripgraph.py
+python/routez/tripgraph_wrap_py.cc
+python/routez/_tripgraph.so
+ruby/routez.so
+ruby/routez_wrap_rb.cc
+ruby/routez_wrap_rb.o
 tags
-testgraph
+examples/testgraph
