@@ -46,6 +46,14 @@ The usual...
 
  - ./autogen.sh && ./configure && make
 
+For an install into your home directory, try running ./configure like so:
+
+ - ./configure --prefix=$HOME --libdir=$HOME/lib
+
+or maybe:
+
+ - ./configure --prefix=$HOME --libdir=$HOME/lib64 # (for many 64-bit systems)
+
 3. Set up your language environment.
 
 You can either 'make install' to install the binding source to the library
