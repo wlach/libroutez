@@ -25,3 +25,4 @@ fi
 AC_CONFIG_FILES(config.mk)
 
 AC_OUTPUT
+
