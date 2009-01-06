@@ -44,5 +44,7 @@ examples/testgraph: examples/testgraph.cc libroutez.so
 	g++ $< -o $@ libroutez.so -fPIC -g -I./include
 
 clean:
-	rm -f lib/*.o examples/testgraph \
-	python/routez/_tripgraph.so python/routez/tripgraph.py python/routez/tripgraph_wrap_py.cc 
+	rm -f *.so lib/*.o python/*.pyc */*.pyc examples/testgraph \
+	python/routez/_tripgraph.so python/routez/tripgraph.py \
+	python/routez/tripgraph_wrap_py.cc python/routez/*.o \
+	ruby/routez.so ruby/*.o ruby/routez_wrap_rb.cc \
