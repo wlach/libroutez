@@ -99,8 +99,8 @@ no attempt is currently made to prettify the output, but hopefully this will at
 least give you a starting point (perhaps that would be a fun little first 
 project for someone who wants to contribute?).
 
-For those who like programming in ruby andpython, there are examples of both in
-the same directory as 'testgraph'.
+For those who like programming in ruby and python, there are examples of both 
+in the same directory as 'testgraph'.
 
 === Contributing ===
 
@@ -109,10 +109,10 @@ is fork my repository on github (http://github.com/wlach/libroutez), apply
 your change (make sure to add your name and nature of contribution to 
 AUTHORS), then either email me (at wrlach@gmail.com) or the libroutez mailing 
 list (http://groups.google.com/group/libroutez) to let us know about what you 
-did. Patch files are also welcome.
+did. Patch files sent directly to wrlach@gmail.com are also welcome.
 
-Note that in order for changes to be committed, they will need to be licensed
-under the same terms as the rest of libroutez (the MIT license). Please
-note that you consent to this in your git commit message or mail the libroutez
-mailing list saying that this (or all) your contributions are released
-under the MIT license.
+In order for changes to be committed, they will need to be licensed under the 
+same terms as the rest of libroutez (the MIT license). Please note that you 
+consent to this in your git commit message or mail the libroutez mailing list 
+saying that this (or all) your contributions are released under the MIT 
+license.
