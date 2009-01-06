@@ -156,45 +156,61 @@ Point get_closest_point(Point &a, Point &b, Point &c)
 }
 
 
+// This complicated-looking method attempts to link gtfs stops to osm nodes.
+// If a stop lies between two osm nodes on a polyline, we will link the gtfs
+// stop to both of them.
 void TripGraph::link_osm_gtfs()
 {
-    // This complicated-looking method attempts to link gtfs stops 
-    // to osm nodes. If a stop lies between two osm nodes on a polyline,
-    // we will link the gtfs stop to both of them.
-
     map<string, pair<string, string> > new_walkhops;
 
+    int tripstop_count = 0;
+    int tripstop_total = tripstops.size();
     for (TripStopDict::iterator i = tripstops.begin(); 
          i != tripstops.end(); i++)
     {
+        tripstop_count++;
+        // For each GTFS stop...
         if (strcmp(i->second->type, "gtfs") == 0)
         {
-            Point p(i->second->lat, i->second->lng);
+            Point gtfs_pt(i->second->lat, i->second->lng);
             
             pair<string, string> nearest_walkhop;
             double min_dist;
+
+            // Check each other trip stop and all its walkhops...
+            // FIXME: This is begging to be optimized.  We need some way to
+            // exclude the bulk of tripstops that are a million miles away.
+            // One idea is to do some sort of quadtree-like partitioning of
+            // the tripstops; then we'd mostly only have to check other stops
+            // within our partition.
+            // Another idea is to put a bounding box around each tripstop and
+            // its associated walkhops, saving us from having to examine each
+            // walkhop of some faraway triphop.
             for (TripStopDict::iterator j = tripstops.begin(); 
                  j != tripstops.end(); j++)
             {
                 for (TripStop::WalkHopDict::iterator k = j->second->wdict.begin(); 
                      k != j->second->wdict.end(); k++)
                 {
-                    Point p1(j->second->lat, j->second->lng);
+                    Point trip_pt(j->second->lat, j->second->lng);
 
                     shared_ptr<TripStop> dest_stop = _get_tripstop(k->first);
-                    Point p2(dest_stop->lat, dest_stop->lng);
+                    Point walk_pt(dest_stop->lat, dest_stop->lng);
 
-                    Point p3 = get_closest_point(p1, p2, p);
+                    Point p = get_closest_point(trip_pt, walk_pt, gtfs_pt);
 
-                    double dist = distance(p.lat, p.lng, 
-                                           p3.lat, p3.lng);
+                    // Find the closest OSM hop to the GTFS stop
+                    double dist = distance(gtfs_pt.lat, gtfs_pt.lng, 
+                                           p.lat, p.lng);
                     if ((nearest_walkhop.first.empty() && 
                          nearest_walkhop.second.empty()) || dist < min_dist)
                     {
                         nearest_walkhop = pair<string,string>();
-                        if (p1 == p3)
+                        // If the GTFS stop is on one of the OSM nodes, use
+                        // that node.  Otherwise remember both nodes.
+                        if (trip_pt == p)
                             nearest_walkhop.first = j->first;
-                        else if (p2 == p3)
+                        else if (walk_pt == p)
                             nearest_walkhop.first = k->first;
                         else
                         {
@@ -208,9 +224,11 @@ void TripGraph::link_osm_gtfs()
             }
             
             new_walkhops[i->first] = nearest_walkhop;
-            printf("Linking %s -> %s, %s\n", i->first.c_str(), 
-                   nearest_walkhop.first.c_str(), 
-                   nearest_walkhop.second.c_str());
+            printf("%02.2f%% done: Linking %s -> %s, %s\n", 
+                    ((float)tripstop_count * 100.0f) / ((float)tripstop_total),
+                    i->first.c_str(), 
+                    nearest_walkhop.first.c_str(), 
+                    nearest_walkhop.second.c_str());
         }
     }
 
