@@ -1,7 +1,7 @@
 #ifndef __TRIPSTOP_H
 #define __TRIPSTOP_H
 #include <assert.h>
-#include <boost/shared_ptr.hpp>
+#include <tr1/memory>
 #include <string.h>
 #include <string>
 #include <stdint.h>
@@ -35,6 +35,7 @@ struct TripStop
 {
     TripStop(FILE *fp);
     TripStop(std::string _id, std::string _type, float _lat, float _lng);
+    TripStop() {}
 
     void write(FILE *fp);
 
@@ -42,14 +43,14 @@ struct TripStop
                      int32_t route_id, std::string service_id);
     void add_walkhop(std::string dest_id, float walktime);
     std::tr1::unordered_set<int> get_routes(std::string service_id);
-    boost::shared_ptr<TripHop> find_triphop(int time, int route_id, 
+    std::tr1::shared_ptr<TripHop> find_triphop(int time, int route_id, 
                                             std::string service_period);
 
     char id[MAX_ID_LEN];
     char type[MAX_ID_LEN];
     float lat;
     float lng;
-    typedef std::vector<boost::shared_ptr<TripHop> > TripHopList;
+    typedef std::vector<std::tr1::shared_ptr<TripHop> > TripHopList;
     typedef std::tr1::unordered_map<int, TripHopList> TripHopDict;
     typedef std::tr1::unordered_map<std::string, TripHopDict> ServiceDict;
     typedef std::tr1::unordered_map<std::string, float> WalkHopDict;

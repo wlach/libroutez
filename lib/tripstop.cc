@@ -1,6 +1,6 @@
 #include "tripstop.h"
+#include <algorithm>
 
-using namespace boost;
 using namespace std;
 using namespace tr1;
 
@@ -44,7 +44,7 @@ TripStop::TripStop(FILE *fp)
 }
 
 
-TripStop::TripStop(string _id, string _type, float _lat, float _lng)
+TripStop::TripStop(string _id, string _type, float _lat, float _lng) 
 {
     assert(_id.length() < MAX_ID_LEN);
     assert(_type.length() < MAX_ID_LEN);
@@ -116,8 +116,8 @@ void TripStop::add_triphop(int32_t start_time, int32_t end_time,
     tdict[service_id][route_id].push_back(shared_ptr<TripHop>(
                                               new TripHop(start_time, 
                                                           end_time, dest_id)));
-    sort(tdict[service_id][route_id].begin(), tdict[service_id][route_id].end(), 
-        sort_triphops);
+    ::sort(tdict[service_id][route_id].begin(), 
+           tdict[service_id][route_id].end(), sort_triphops);
 }
 
 

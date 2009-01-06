@@ -5,7 +5,6 @@
 #include <map>
 #include <math.h>
 
-using namespace boost;
 using namespace std;
 using namespace tr1;
 

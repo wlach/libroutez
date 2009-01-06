@@ -9,7 +9,7 @@
 
 using namespace std;
 using namespace tr1;
-using namespace boost;
+using namespace tr1;
 
 
 static inline double radians(double degrees)

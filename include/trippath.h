@@ -2,7 +2,7 @@
 #define __TRIPPATH_H
 #include <tr1/unordered_set>
 #include <list>
-#include <boost/shared_ptr.hpp>
+#include <tr1/memory>
 #include "tripstop.h"
 
 
@@ -21,7 +21,7 @@ struct TripAction
     int route_id;
 
     // pointer to the action which preceded this one
-    boost::shared_ptr<TripAction> parent;
+    std::tr1::shared_ptr<TripAction> parent;
 };
 
 
@@ -29,25 +29,25 @@ struct TripPath
 {
   public:
     TripPath(double _time, double _fastest_speed, 
-             boost::shared_ptr<TripStop> &_dest_stop, 
-             boost::shared_ptr<TripStop> &_last_stop);
+             std::tr1::shared_ptr<TripStop> &_dest_stop, 
+             std::tr1::shared_ptr<TripStop> &_last_stop);
     TripPath() {}
 
-    boost::shared_ptr<TripPath> add_action(
-        boost::shared_ptr<TripAction> &action, 
+    std::tr1::shared_ptr<TripPath> add_action(
+        std::tr1::shared_ptr<TripAction> &action, 
         std::tr1::unordered_set<int> &_possible_route_ids,
-        boost::shared_ptr<TripStop> &_last_stop);
+        std::tr1::shared_ptr<TripStop> &_last_stop);
 
     // the following are mostly for the benefit of language bindings
     // C++ code should be able to access this directly with less overhead...
     std::list<TripAction> get_actions();
-    //boost::python::object get_last_action();
+    //std::tr1python::object get_last_action();
 
     double time;
     double fastest_speed;
-    boost::shared_ptr<TripStop> dest_stop;
-    boost::shared_ptr<TripStop> last_stop;
-    boost::shared_ptr<TripAction> last_action;
+    std::tr1::shared_ptr<TripStop> dest_stop;
+    std::tr1::shared_ptr<TripStop> last_stop;
+    std::tr1::shared_ptr<TripAction> last_action;
 
     double walking_time;
     double route_time;
@@ -62,7 +62,7 @@ private:
 
     // Given an action just after the end of a walk in the path, delays
     // that walk by the given number of seconds.
-    void delay_walk(boost::shared_ptr<TripAction> walk, float secs);
+    void delay_walk(std::tr1::shared_ptr<TripAction> walk, float secs);
 };
 
 #endif // __TRIPPATH_H

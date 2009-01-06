@@ -1,12 +1,12 @@
 #ifndef __TRIPGRAPH_H
 #define __TRIPGRAPH_H
 #include <queue>
-#include <string>
 #include <stdint.h>
-#include <tr1/unordered_map>
-
+#include <string>
+#include <tr1/memory>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+
+#include <tr1/unordered_map>
 #include "trippath.h"
 #include "tripstop.h"
 
@@ -35,26 +35,26 @@ class TripGraph
     // various internal types
     struct PathCompare
     {
-        inline bool operator() (const boost::shared_ptr<TripPath> &x, 
-                                const boost::shared_ptr<TripPath> &y)
+        inline bool operator() (const std::tr1::shared_ptr<TripPath> &x, 
+                                const std::tr1::shared_ptr<TripPath> &y)
         {
             return x->heuristic_weight > y->heuristic_weight;
         }
     };
 
-    typedef std::vector<boost::shared_ptr<TripPath> > TripPathList;
-    typedef std::tr1::unordered_map<const char*, std::tr1::unordered_map<int, boost::shared_ptr<TripPath> > > VisitedRouteMap;
-    typedef std::tr1::unordered_map<const char*, std::tr1::unordered_map<const char*, boost::shared_ptr<TripPath> > > VisitedWalkMap;
-    typedef std::priority_queue<boost::shared_ptr<TripPath>, std::vector<boost::shared_ptr<TripPath> >, PathCompare> PathQueue;
-    typedef std::tr1::unordered_map<std::string, boost::shared_ptr<TripStop> > TripStopDict;
+    typedef std::vector<std::tr1::shared_ptr<TripPath> > TripPathList;
+    typedef std::tr1::unordered_map<const char*, std::tr1::unordered_map<int, std::tr1::shared_ptr<TripPath> > > VisitedRouteMap;
+    typedef std::tr1::unordered_map<const char*, std::tr1::unordered_map<const char*, std::tr1::shared_ptr<TripPath> > > VisitedWalkMap;
+    typedef std::priority_queue<std::tr1::shared_ptr<TripPath>, std::vector<std::tr1::shared_ptr<TripPath> >, PathCompare> PathQueue;
+    typedef std::tr1::unordered_map<std::string, std::tr1::shared_ptr<TripStop> > TripStopDict;
     
   private:
     // internal copy of get_tripstop: returns a pointer, not a copy, so
     // much faster (when called many times)
-    boost::shared_ptr<TripStop> _get_tripstop(std::string id);
-    boost::shared_ptr<TripStop> get_nearest_stop(double lat, double lng);
+    std::tr1::shared_ptr<TripStop> _get_tripstop(std::string id);
+    std::tr1::shared_ptr<TripStop> get_nearest_stop(double lat, double lng);
 
-    void extend_path(boost::shared_ptr<TripPath> &path, 
+    void extend_path(std::tr1::shared_ptr<TripPath> &path, 
                      std::string &service_period, bool walkonly, 
                      const char *end_id, int &num_paths_considered,
                      VisitedRouteMap &visited_routes, 

@@ -1,7 +1,8 @@
+#include <stdlib.h>
 #include "tripgraph.h"
 
-using namespace boost;
 using namespace std;
+using namespace tr1;
 
 
 void print_actions(shared_ptr<TripAction> &action)
@@ -23,7 +24,7 @@ int main(int argc, char *argv[])
         printf("Usage: %s <graph file> <src lat> <src lng> <dest lat> "
                "<dest lng> <start time (seconds since day start)> "
                "<service period (e.g. 'weekday')>\n", argv[0]);
-        exit(1);
+        return 1;
     }
 
     float src_lat = atof(argv[2]);

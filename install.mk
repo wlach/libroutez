@@ -16,5 +16,9 @@ install-ruby:
 	$(INSTALL) -d $(DESTDIR)$(libdir)/ruby
 	$(INSTALL) ruby/routez.so $(DESTDIR)$(libdir)/ruby
 
+install-util:
+	$(INSTALL) -d $(DESTDIR)$(bindir)
+	$(INSTALL) utils/creategraph.py $(DESTDIR)$(bindir)
 
-install: install-libroutez install-python
+
+install: install-libroutez install-python install-util
