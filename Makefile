@@ -28,7 +28,7 @@ libroutez.so: $(TRIPGRAPH_OBJECTS)
 
 # python bindings
 python/libroutez/tripgraph.py python/libroutez/tripgraph_wrap_py.cc: tripgraph.i
-	swig -c++ -python -I./include -o python/libroutez/tripgraph_wrap_py.cc $<
+	swig -c++ -python -I./include -outdir python/libroutez -o python/libroutez/tripgraph_wrap_py.cc $<
 python/libroutez/_tripgraph.so: libroutez.so python/libroutez/tripgraph_wrap_py.o
 	g++ -shared -o $@ python/libroutez/tripgraph_wrap_py.o libroutez.so $(PYTHON_LDFLAGS) -fPIC
 
