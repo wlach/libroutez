@@ -2,7 +2,7 @@
 #include <algorithm>
 
 using namespace std;
-using namespace tr1;
+using namespace boost;
 
 
 static bool operator<(const TripHop& x, const TripHop& y)

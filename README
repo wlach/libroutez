@@ -32,7 +32,13 @@ to add a simple converter for your preferred data type.
 
 === Setup and use ===
 
+These instructions assume you are on a UNIX-based system (e.g. Linux or 
+MacOS X). 
+
 1. Download and install the following packages:
+ - Boost
+  - Probably any recent version should do. We need shared_ptr, unordered_set,
+  and unordered_map.
  - Google Transit Data Feed (http://code.google.com/p/googletransitdatafeed/)
    - As of this writing you need what's in SVN, as it has a fix that I made
    to actually handle interpolated stops correctly. The next version after

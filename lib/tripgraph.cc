@@ -1,12 +1,11 @@
 #include "tripgraph.h"
 #include <assert.h>
 #include <errno.h>
-#include <tr1/unordered_map>
 #include <map>
 #include <math.h>
 
 using namespace std;
-using namespace tr1;
+using namespace boost;
 
 // Estimated walking speed in m/s
 static const float est_walk_speed = 1.1f;

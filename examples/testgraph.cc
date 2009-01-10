@@ -2,7 +2,7 @@
 #include "tripgraph.h"
 
 using namespace std;
-using namespace tr1;
+using namespace boost;
 
 
 void print_actions(shared_ptr<TripAction> &action)

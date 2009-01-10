@@ -1,12 +1,12 @@
 #ifndef __TRIPSTOP_H
 #define __TRIPSTOP_H
 #include <assert.h>
-#include <tr1/memory>
+#include <boost/shared_ptr.hpp>
+#include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 #include <string.h>
 #include <string>
 #include <stdint.h>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
 #include <vector>
 
 #define MAX_ID_LEN 16
@@ -42,18 +42,18 @@ struct TripStop
     void add_triphop(int32_t start_time, int32_t end_time, std::string dest_id, 
                      int32_t route_id, std::string service_id);
     void add_walkhop(std::string dest_id, float walktime);
-    std::tr1::unordered_set<int> get_routes(std::string service_id);
-    std::tr1::shared_ptr<TripHop> find_triphop(int time, int route_id, 
+    boost::unordered_set<int> get_routes(std::string service_id);
+    boost::shared_ptr<TripHop> find_triphop(int time, int route_id, 
                                             std::string service_period);
 
     char id[MAX_ID_LEN];
     char type[MAX_ID_LEN];
     float lat;
     float lng;
-    typedef std::vector<std::tr1::shared_ptr<TripHop> > TripHopList;
-    typedef std::tr1::unordered_map<int, TripHopList> TripHopDict;
-    typedef std::tr1::unordered_map<std::string, TripHopDict> ServiceDict;
-    typedef std::tr1::unordered_map<std::string, float> WalkHopDict;
+    typedef std::vector<boost::shared_ptr<TripHop> > TripHopList;
+    typedef boost::unordered_map<int, TripHopList> TripHopDict;
+    typedef boost::unordered_map<std::string, TripHopDict> ServiceDict;
+    typedef boost::unordered_map<std::string, float> WalkHopDict;
     ServiceDict tdict;
     WalkHopDict wdict;
 };

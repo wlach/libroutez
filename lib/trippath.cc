@@ -8,9 +8,7 @@
 #endif
 
 using namespace std;
-using namespace tr1;
-using namespace tr1;
-
+using namespace boost;
 
 static inline double radians(double degrees)
 {
