@@ -2,7 +2,13 @@
 
 libroutez is a library written to help plan trips. Currently, its focus is
 on providing directions for using public transit, but it could be easily 
-extended to cover other things (e.g. cycle-path planning). 
+extended to cover other things (e.g. cycle-path planning). Specifically,
+it provides an interface to solving the following problems:
+
+- Finding the closest point in a road/transportation network to a specific 
+latitude-longitude pair.
+- Finding the shortest path between two points in a road/transportation 
+network.
 
 The design of libroutez is based on the following principles:
 
