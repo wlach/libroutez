@@ -253,6 +253,9 @@ void TripGraph::link_osm_gtfs()
 
 shared_ptr<TripStop> TripGraph::get_nearest_stop(double lat, double lng)
 {
+    // FIXME: use a quadtree to speed this up, see link_osm_gtfs() for
+    // more thoughts on this
+    
     shared_ptr<TripStop> closest_stop;
     double min_dist = 0.0f;
     for (TripStopDict::iterator i = tripstops.begin(); 
