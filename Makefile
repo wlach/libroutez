@@ -43,8 +43,18 @@ ruby/routez.so: libroutez.so ruby/routez_wrap_rb.o
 examples/testgraph: examples/testgraph.cc libroutez.so
 	g++ $< -o $@ libroutez.so -fPIC -g -I./include
 
+# unit test suite
+TEST_OBJS=t/tripgraph.t.o t/all.t.o
+t/all.t: $(TEST_OBJS) libroutez.so
+	g++ $(TEST_OBJS) -o $@ libroutez.so -fPIC -g
+
+.PHONY: test
+test: t/all.t
+	valgrind --tool=memcheck --suppressions=t/boost.supp t/all.t
+
 clean:
 	rm -f *.so lib/*.o python/*.pyc */*.pyc examples/testgraph \
 	python/libroutez/_tripgraph.so python/libroutez/tripgraph.py \
 	python/libroutez/tripgraph_wrap_py.cc python/libroutez/*.o \
 	ruby/routez.so ruby/*.o ruby/routez_wrap_rb.cc \
+	t/*.o t/all.t
