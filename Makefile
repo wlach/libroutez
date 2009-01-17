@@ -50,7 +50,7 @@ t/all.t: $(TEST_OBJS) libroutez.so
 
 .PHONY: test
 test: t/all.t
-	valgrind --tool=memcheck --suppressions=t/boost.supp t/all.t
+	LD_LIBRARY_PATH=$(PWD) valgrind --tool=memcheck --suppressions=t/boost.supp t/all.t
 
 clean:
 	rm -f *.so lib/*.o python/*.pyc */*.pyc examples/testgraph \
