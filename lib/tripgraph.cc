@@ -7,6 +7,13 @@
 using namespace std;
 using namespace boost;
 
+// set to 1 to see what find_path is doing (VERY verbose)
+#if 0
+# define DEBUGPATH(fmt, args...) fprintf(stderr, fmt, ## args)
+#else
+# define DEBUGPATH
+#endif
+
 // Estimated walking speed in m/s
 static const float est_walk_speed = 1.1f;
 
@@ -292,7 +299,7 @@ TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
 
     shared_ptr<TripStop> start_node = get_nearest_stop(src_lat, src_lng);
     shared_ptr<TripStop> end_node = get_nearest_stop(dest_lat, dest_lng);
-    printf("Start: %s End: %s\n", start_node->id, end_node->id);
+    DEBUGPATH("Start: %s End: %s\n", start_node->id, end_node->id);
 
     // Consider the distance required to reach the start node from the 
     // beginning, and add that to our start time.
@@ -300,7 +307,7 @@ TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
                                       start_node->lat, start_node->lng);
     secs += (int)(dist_from_start / est_walk_speed);
     
-    printf("Start time - %d\n", secs);
+    DEBUGPATH("Start time - %d\n", secs);
     shared_ptr<TripPath> start_path(new TripPath(secs, est_walk_speed, 
                                                  end_node, start_node));
     if (start_node == end_node)
@@ -324,9 +331,9 @@ TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
             uncompleted_paths.top()->heuristic_weight > 
             completed_paths.top()->heuristic_weight)
         {
-            printf("Breaking with %d uncompleted paths (paths "
-                   "considered: %d).\n", uncompleted_paths.size(), 
-                   num_paths_considered);
+            DEBUGPATH("Breaking with %d uncompleted paths (paths "
+                      "considered: %d).\n", uncompleted_paths.size(), 
+                      num_paths_considered);
             return TripPath(*(completed_paths.top()));
         }
 
@@ -378,9 +385,9 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
     }
 #endif
     
-    // printf("Extending path at vertex %s (on %d) @ %f (walktime: %f, routetime:%f)\n", src_id, 
-    //         last_route_id, path->time, path->walking_time, path->route_time);
-
+    DEBUGPATH("Extending path at vertex %s (on %d) @ %f (walktime: %f, "
+              "routetime:%f)\n", src_id, last_route_id, path->time, 
+              path->walking_time, path->route_time);
     shared_ptr<TripStop> src_stop = _get_tripstop(src_id);
 
     // Keep track of outgoing route ids at this node: make sure that we 
@@ -414,14 +421,14 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
             shared_ptr<TripPath> path2 = path->add_action(
                 action, outgoing_route_ids, ds);
 
-            //printf("- Considering walkpath to %s\n", dest_id);
+            DEBUGPATH("- Considering walkpath to %s\n", dest_id);
 
             if (v1 == vsrc.end() || 
                 v1->second->heuristic_weight > path2->heuristic_weight ||
                 ((v1->second->heuristic_weight - path2->heuristic_weight) < 1.0f &&
                  v1->second->walking_time > path2->walking_time))
             {
-                //printf("-- Adding walkpath to %s\n", dest_id);
+                DEBUGPATH("-- Adding walkpath to %s\n", dest_id);
                 if (strcmp(dest_id, goal_id) == 0)
                     completed_paths.push(path2);
                 else
