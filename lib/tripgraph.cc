@@ -102,11 +102,11 @@ void TripGraph::save(string fname)
 
 void TripGraph::add_triphop(int32_t start_time, int32_t end_time, 
                             string src_id, string dest_id, int32_t route_id, 
-                            string service_id)
+                            int32_t trip_id, string service_id)
 {
     // will assert if src_id doesn't exist!!
     _get_tripstop(src_id)->add_triphop(start_time, end_time, dest_id, route_id, 
-                           service_id);
+                                       trip_id, service_id);
 }
 
 
@@ -315,35 +315,42 @@ TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
 
     uncompleted_paths.push(start_path);
 
-    int num_paths_considered = 0;
+    TripPath best_completed_path;
 
-    while (uncompleted_paths.size() > 0)
+    for (int i=0; i<3; i++)
     {
-        shared_ptr<TripPath> path = uncompleted_paths.top();
-        uncompleted_paths.pop();
-        extend_path(path, service_period, walkonly, end_node->id, 
-                    num_paths_considered, visited_routes, visited_walks, 
-                    uncompleted_paths, completed_paths);
+        int num_paths_considered = 0;
 
-        // If we've still got open paths, but their weight exceeds that
-        // of the weight of a completed path, break.
-        if (uncompleted_paths.size() > 0 && completed_paths.size() > 0 &&
-            uncompleted_paths.top()->heuristic_weight > 
-            completed_paths.top()->heuristic_weight)
+        while (uncompleted_paths.size() > 0)
         {
-            DEBUGPATH("Breaking with %d uncompleted paths (paths "
-                      "considered: %d).\n", uncompleted_paths.size(), 
-                      num_paths_considered);
-            return TripPath(*(completed_paths.top()));
+            shared_ptr<TripPath> path = uncompleted_paths.top();
+            uncompleted_paths.pop();
+            extend_path(path, service_period, walkonly, end_node->id, 
+                        num_paths_considered, visited_routes, visited_walks, 
+                        uncompleted_paths, completed_paths);
+
+            // If we've still got open paths, but their weight exceeds that
+            // of the weight of a completed path, break.
+            if (uncompleted_paths.size() > 0 && completed_paths.size() > 0 &&
+                uncompleted_paths.top()->heuristic_weight > 
+                completed_paths.top()->heuristic_weight)
+            {
+                DEBUGPATH("Breaking with %d uncompleted paths (paths "
+                          "considered: %d).\n", uncompleted_paths.size(), 
+                          num_paths_considered);
+                return TripPath(*(completed_paths.top()));
+            }
+
+            //if len(completed_paths) > 0 and len(uncompleted_paths) > 0:
+            //  print "Weight of best completed path: %s, uncompleted: %s" % \
+            //      (completed_paths[0].heuristic_weight, uncompleted_paths[0].heuristic_weight)
         }
 
-        //if len(completed_paths) > 0 and len(uncompleted_paths) > 0:
-        //  print "Weight of best completed path: %s, uncompleted: %s" % \
-        //      (completed_paths[0].heuristic_weight, uncompleted_paths[0].heuristic_weight)
+        if (completed_paths.size())
+            best_completed_path = TripPath(*(completed_paths.top()));
     }
 
-    if (completed_paths.size())
-        return TripPath(*(completed_paths.top()));
+    return best_completed_path;
 
     return TripPath();
 }

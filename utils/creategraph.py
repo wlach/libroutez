@@ -24,11 +24,9 @@ def load_gtfs(tripgraph, sched):
             print "WARNING: Negative edge in gtfs. This probably means you "
             "need a more recent version of the google transit feed " 
             "package (see README)"
-
-          #print "Adding triphop %s %s %s->%s" % (trip.trip_id, trip.trip_headsign, prevstop.stop_id, stop.stop_id)
           tripgraph.add_triphop(prevsecs, secs, str("gtfs"+prevstop.stop_id),
                                 str("gtfs"+stop.stop_id), int(trip.route_id), 
-                                str(trip.service_id))        
+                                int(trip.trip_id), str(trip.service_id))        
         prevstop = stop
         prevsecs = secs
 

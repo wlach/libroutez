@@ -19,7 +19,7 @@ class TripGraph
     void save(std::string fname);
 
     void add_triphop(int32_t start_time, int32_t end_time, std::string src_id, 
-                     std::string dest_id, int32_t route_id,
+                     std::string dest_id, int32_t route_id, int32_t trip_id,
                      std::string service_id);
     void add_tripstop(std::string id, std::string type, float lat, float lng);
     void add_walkhop(std::string src_id, std::string dest_id);
