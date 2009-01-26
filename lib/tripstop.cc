@@ -103,12 +103,12 @@ void TripStop::write(FILE *fp)
         }
     }
 
-    uint32_t num_walkhops = wdict.size();
+    uint32_t num_walkhops = wlist.size();
     assert(fwrite(&num_walkhops, sizeof(uint32_t), 1, fp) == 1);
-    for (WalkHopDict::iterator i = wdict.begin(); i != wdict.end(); i++)
+    for (WalkHopList::iterator i = wlist.begin(); i != wlist.end(); i++)
     {
-        assert(fwrite(&i->first, sizeof(int32_t), 1, fp) == 1);
-        assert(fwrite(&i->second, sizeof(float), 1, fp) == 1);
+        assert(fwrite(&i->dest_id, sizeof(int32_t), 1, fp) == 1);
+        assert(fwrite(&i->walktime, sizeof(float), 1, fp) == 1);
     }
 }
 
@@ -138,7 +138,7 @@ void TripStop::add_triphop(int32_t start_time, int32_t end_time,
 
 void TripStop::add_walkhop(int32_t dest_id, float walktime)
 {
-    wdict[dest_id] = walktime;
+    wlist.push_front(WalkHop(dest_id, walktime));
 }
 
 

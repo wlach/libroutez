@@ -8,6 +8,7 @@
 #include <string>
 #include <stdint.h>
 #include <vector>
+#include <list>
 
 const int MAX_ID_LEN = 20;
 
@@ -30,6 +31,20 @@ struct TripHop
     int32_t end_time;
     int32_t dest_id;
     int32_t trip_id;
+};
+
+
+struct WalkHop
+{
+    WalkHop() { }
+    WalkHop(int32_t _dest_id, float _walktime)
+    {
+        dest_id = _dest_id;
+        walktime = _walktime;
+    }
+
+    int32_t dest_id;
+    double walktime;
 };
 
 
@@ -60,7 +75,9 @@ struct TripStop
     // we keep a pointer to a tdict, as most nodes won't have one and we
     // don't want the memory overhead of one if not strictly needed
     boost::shared_ptr<ServiceDict> tdict;
-    WalkHopDict wdict;
+
+    typedef std::list<WalkHop> WalkHopList;
+    WalkHopList wlist;
 };
 
 #endif // __TRIPSTOP_H

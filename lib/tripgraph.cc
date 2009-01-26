@@ -198,12 +198,12 @@ void TripGraph::link_osm_gtfs()
             for (TripStopDict::iterator j = tripstops.begin(); 
                  j != tripstops.end(); j++)
             {
-                for (TripStop::WalkHopDict::iterator k = j->second->wdict.begin(); 
-                     k != j->second->wdict.end(); k++)
+                for (TripStop::WalkHopList::iterator k = j->second->wlist.begin(); 
+                     k != j->second->wlist.end(); k++)
                 {
                     Point trip_pt(j->second->lat, j->second->lng);
 
-                    shared_ptr<TripStop> dest_stop = _get_tripstop(k->first);
+                    shared_ptr<TripStop> dest_stop = _get_tripstop(k->dest_id);
                     Point walk_pt(dest_stop->lat, dest_stop->lng);
 
                     Point p = get_closest_point(trip_pt, walk_pt, gtfs_pt);
@@ -220,11 +220,11 @@ void TripGraph::link_osm_gtfs()
                         if (trip_pt == p)
                             nearest_walkhop.first = j->first;
                         else if (walk_pt == p)
-                            nearest_walkhop.first = k->first;
+                            nearest_walkhop.first = k->dest_id;
                         else
                         {
                             nearest_walkhop.first = j->first;
-                            nearest_walkhop.second = k->first;
+                            nearest_walkhop.second = k->dest_id;
                         }
 
                         min_dist = dist;
@@ -411,11 +411,11 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
     // travelled?)
     if (last_route_id == -1 || path->route_time > (2 * 60))
     {
-        for (TripStop::WalkHopDict::iterator i = src_stop->wdict.begin();
-             i != src_stop->wdict.end(); i++)
+        for (TripStop::WalkHopList::iterator i = src_stop->wlist.begin();
+             i != src_stop->wlist.end(); i++)
         {
-            int32_t dest_id = i->first;
-            double walktime = i->second;
+            int32_t dest_id = i->dest_id;
+            double walktime = i->walktime;
 
             // Do a quick test to make sure that the potential basis for a 
             // new path isn't worse than what we have already, before
