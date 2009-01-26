@@ -11,8 +11,8 @@ void print_actions(shared_ptr<TripAction> &action)
     if (parent)
         print_actions(parent);
 
-    printf("%s->%s; route: %d; start time: %.2f; end time: %.2f\n", 
-           action->src_id.c_str(), action->dest_id.c_str(), action->route_id, 
+    printf("%d->%d; route: %d; start time: %.2f; end time: %.2f\n", 
+           action->src_id, action->dest_id, action->route_id, 
            action->start_time, action->end_time);
 }
 

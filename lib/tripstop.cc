@@ -13,7 +13,7 @@ static bool operator<(const TripHop& x, const TripHop& y)
 
 TripStop::TripStop(FILE *fp) 
 {
-    assert(fread(id, 1, MAX_ID_LEN, fp) == MAX_ID_LEN);
+    assert(fread(&id, sizeof(int32_t), 1, fp) == 1);
     assert(fread(type, 1, MAX_ID_LEN, fp) == MAX_ID_LEN);
     assert(fread(&lat, sizeof(float), 1, fp) == 1);
     assert(fread(&lng, sizeof(float), 1, fp) == 1);
@@ -35,20 +35,20 @@ TripStop::TripStop(FILE *fp)
     assert(fread(&num_walkhops, sizeof(uint32_t), 1, fp) == 1);
     for (int i=0; i<num_walkhops; i++)
     {
-        char dest_id[MAX_ID_LEN];
+        int32_t dest_id;
         float walktime;
-        assert(fread(dest_id, 1, MAX_ID_LEN, fp) == MAX_ID_LEN);
+        assert(fread(&dest_id, sizeof(int32_t), 1, fp) == 1);
         assert(fread(&walktime, sizeof(float), 1, fp) == 1);
         add_walkhop(dest_id, walktime);
     }
 }
 
 
-TripStop::TripStop(string _id, string _type, float _lat, float _lng) 
+TripStop::TripStop(int32_t _id, string _type, float _lat, float _lng) 
 {
-    assert(_id.length() < MAX_ID_LEN);
+    id = _id;
+
     assert(_type.length() < MAX_ID_LEN);
-    strcpy(id, _id.c_str());
     strcpy(type, _type.c_str());
     
     lat = _lat;
@@ -58,7 +58,7 @@ TripStop::TripStop(string _id, string _type, float _lat, float _lng)
 
 void TripStop::write(FILE *fp)
 {
-    assert(fwrite(id, 1, MAX_ID_LEN, fp) == MAX_ID_LEN);
+    assert(fwrite(&id, sizeof(int32_t), 1, fp) == 1);
     assert(fwrite(type, 1, MAX_ID_LEN, fp) == MAX_ID_LEN);
     assert(fwrite(&lat, sizeof(float), 1, fp) == 1);
     assert(fwrite(&lng, sizeof(float), 1, fp) == 1);
@@ -93,11 +93,8 @@ void TripStop::write(FILE *fp)
     assert(fwrite(&num_walkhops, sizeof(uint32_t), 1, fp) == 1);
     for (WalkHopDict::iterator i = wdict.begin(); i != wdict.end(); i++)
     {
-        char dest_id[MAX_ID_LEN];
-        strcpy(dest_id, i->first.c_str());
-
-        assert(fwrite(&dest_id, 1, MAX_ID_LEN, fp) == MAX_ID_LEN);
-        assert(fwrite(&i->second, sizeof(float), 1, fp) == 1);        
+        assert(fwrite(&i->first, sizeof(int32_t), 1, fp) == 1);
+        assert(fwrite(&i->second, sizeof(float), 1, fp) == 1);
     }
 }
 
@@ -110,7 +107,7 @@ static bool sort_triphops(const shared_ptr<TripHop> &x,
 
 
 void TripStop::add_triphop(int32_t start_time, int32_t end_time, 
-                           string dest_id, int32_t route_id, int32_t trip_id,
+                           int32_t dest_id, int32_t route_id, int32_t trip_id,
                            string service_id)
 {
     tdict[service_id][route_id].push_back(shared_ptr<TripHop>(
@@ -122,7 +119,7 @@ void TripStop::add_triphop(int32_t start_time, int32_t end_time,
 }
 
 
-void TripStop::add_walkhop(string dest_id, float walktime)
+void TripStop::add_walkhop(int32_t dest_id, float walktime)
 {
     wdict[dest_id] = walktime;
 }

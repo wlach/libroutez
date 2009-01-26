@@ -73,9 +73,11 @@ void TripGraph::load(string fname)
     while (i < num_tripstops)
     {
         shared_ptr<TripStop> s(new TripStop(fp));
-        tripstops.insert(pair<string,shared_ptr<TripStop> >(s->id, s));
+        tripstops.insert(pair<int32_t,shared_ptr<TripStop> >(s->id, s));
         i++;
     }
+
+    fclose(fp);
 }
 
 
@@ -92,16 +94,18 @@ void TripGraph::save(string fname)
     // write triphops
     uint32_t num_tripstops = tripstops.size();
     assert(fwrite(&num_tripstops, sizeof(uint32_t), 1, fp) == 1);
-    for (TripStopDict::iterator i = tripstops.begin(); 
+    for (TripStopDict::iterator i = tripstops.begin();
          i != tripstops.end(); i++)
     {
         i->second->write(fp);
     }
+
+    fclose(fp);
 }
 
 
 void TripGraph::add_triphop(int32_t start_time, int32_t end_time, 
-                            string src_id, string dest_id, int32_t route_id, 
+                            int32_t src_id, int32_t dest_id, int32_t route_id, 
                             int32_t trip_id, string service_id)
 {
     // will assert if src_id doesn't exist!!
@@ -110,14 +114,14 @@ void TripGraph::add_triphop(int32_t start_time, int32_t end_time,
 }
 
 
-void TripGraph::add_tripstop(string id, string type, float lat, float lng)
+void TripGraph::add_tripstop(int32_t id, string type, float lat, float lng)
 {
     shared_ptr<TripStop> s(new TripStop(id, type, lat, lng));
-    tripstops.insert(pair<string,shared_ptr<TripStop> >(id, s));
+    tripstops.insert(pair<int32_t,shared_ptr<TripStop> >(id, s));
 }
 
 
-void TripGraph::add_walkhop(string src_id, string dest_id)
+void TripGraph::add_walkhop(int32_t src_id, int32_t dest_id)
 {
     // will assert if src_id or dest_id doesn't exist!!
     shared_ptr<TripStop> ts_src = _get_tripstop(src_id);
@@ -166,7 +170,7 @@ Point get_closest_point(Point &a, Point &b, Point &c)
 // stop to both of them.
 void TripGraph::link_osm_gtfs()
 {
-    map<string, pair<string, string> > new_walkhops;
+    map<int32_t, pair<int32_t, int32_t> > new_walkhops;
 
     int tripstop_count = 0;
     int tripstop_total = tripstops.size();
@@ -179,7 +183,7 @@ void TripGraph::link_osm_gtfs()
         {
             Point gtfs_pt(i->second->lat, i->second->lng);
             
-            pair<string, string> nearest_walkhop;
+            pair<int32_t, int32_t> nearest_walkhop(-1, -1);
             double min_dist;
 
             // Check each other trip stop and all its walkhops...
@@ -207,10 +211,10 @@ void TripGraph::link_osm_gtfs()
                     // Find the closest OSM hop to the GTFS stop
                     double dist = distance(gtfs_pt.lat, gtfs_pt.lng, 
                                            p.lat, p.lng);
-                    if ((nearest_walkhop.first.empty() && 
-                         nearest_walkhop.second.empty()) || dist < min_dist)
+                    if ((nearest_walkhop.first == (-1) && 
+                         nearest_walkhop.second == (-1)) || dist < min_dist)
                     {
-                        nearest_walkhop = pair<string,string>();
+                        nearest_walkhop = pair<int32_t,int32_t>();
                         // If the GTFS stop is on one of the OSM nodes, use
                         // that node.  Otherwise remember both nodes.
                         if (trip_pt == p)
@@ -229,26 +233,26 @@ void TripGraph::link_osm_gtfs()
             }
             
             new_walkhops[i->first] = nearest_walkhop;
-            printf("%02.2f%% done: Linking %s -> %s, %s\n", 
+            printf("%02.2f%% done: Linking %d -> %d, %d\n", 
                     ((float)tripstop_count * 100.0f) / ((float)tripstop_total),
-                    i->first.c_str(), 
-                    nearest_walkhop.first.c_str(), 
-                    nearest_walkhop.second.c_str());
+                    i->first, 
+                    nearest_walkhop.first, 
+                    nearest_walkhop.second);
         }
     }
 
 
-    for (map<string, pair<string, string> >::iterator i = new_walkhops.begin();
+    for (map<int32_t, pair<int32_t, int32_t> >::iterator i = new_walkhops.begin();
          i != new_walkhops.end(); i++)
     {
-        string osmstop1 = i->second.first;
-        string osmstop2 = i->second.second;
+        int32_t osmstop1 = i->second.first;
+        int32_t osmstop2 = i->second.second;
 
-        assert(!osmstop1.empty());
+        assert(osmstop1 >= 0);
         add_walkhop(i->first, osmstop1);
         add_walkhop(osmstop1, i->first);
 
-        if (!osmstop2.empty())
+        if (osmstop2 >= 0)
         {
             add_walkhop(i->first, osmstop2);
             add_walkhop(osmstop2, i->first);
@@ -280,7 +284,7 @@ shared_ptr<TripStop> TripGraph::get_nearest_stop(double lat, double lng)
 }
 
 
-TripStop TripGraph::get_tripstop(string id)
+TripStop TripGraph::get_tripstop(int32_t id)
 {
     shared_ptr<TripStop> ts = _get_tripstop(id);
     return TripStop(*ts);
@@ -356,7 +360,7 @@ TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
 }
 
 
-shared_ptr<TripStop> TripGraph::_get_tripstop(string id)
+shared_ptr<TripStop> TripGraph::_get_tripstop(int32_t id)
 {
     TripStopDict::iterator ts = tripstops.find(id);
     assert(ts != tripstops.end());
@@ -368,7 +372,7 @@ shared_ptr<TripStop> TripGraph::_get_tripstop(string id)
 void TripGraph::extend_path(shared_ptr<TripPath> &path, 
                             string &service_period, 
                             bool walkonly,
-                            const char *goal_id,
+                            int32_t goal_id,
                             int &num_paths_considered,
                             VisitedRouteMap &visited_routes,
                             VisitedWalkMap &visited_walks, 
@@ -376,7 +380,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
                             PathQueue &completed_paths)
 {
     TripPathList newpaths;
-    const char * src_id = path->last_stop->id;
+    int32_t src_id = path->last_stop->id;
     int last_route_id = path->last_route_id;
 
 #if 0
@@ -410,14 +414,14 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
         for (TripStop::WalkHopDict::iterator i = src_stop->wdict.begin();
              i != src_stop->wdict.end(); i++)
         {
-            const char *dest_id = i->first.c_str();
+            int32_t dest_id = i->first;
             double walktime = i->second;
 
             // Do a quick test to make sure that the potential basis for a 
             // new path isn't worse than what we have already, before
             // incurring the cost of creating a new path and evaluating it.
-            unordered_map<const char*, shared_ptr<TripPath> > vsrc = visited_walks[src_id];
-            unordered_map<const char*, shared_ptr<TripPath> >::iterator v1 = vsrc.find(dest_id);
+            unordered_map<int32_t, shared_ptr<TripPath> > vsrc = visited_walks[src_id];
+            unordered_map<int32_t, shared_ptr<TripPath> >::iterator v1 = vsrc.find(dest_id);
             if (v1 != vsrc.end() && path->heuristic_weight > v1->second->heuristic_weight)
                 continue;
                 
@@ -436,7 +440,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
                  v1->second->walking_time > path2->walking_time))
             {
                 DEBUGPATH("-- Adding walkpath to %s\n", dest_id);
-                if (strcmp(dest_id, goal_id) == 0)
+                if (dest_id == goal_id)
                     completed_paths.push(path2);
                 else
                     uncompleted_paths.push(path2);
@@ -500,7 +504,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
                     ((v->second->heuristic_weight - path2->heuristic_weight) < 1.0f &&
                      v->second->walking_time > path2->walking_time))
                 {
-                    if (strcmp(t->dest_id, goal_id) == 0)
+                    if (t->dest_id == goal_id)
                         completed_paths.push(path2);
                     else
                         uncompleted_paths.push(path2);

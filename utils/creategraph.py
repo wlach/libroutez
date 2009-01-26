@@ -8,7 +8,7 @@ from libroutez.tripgraph import *
 def load_gtfs(tripgraph, sched):
     stops = sched.GetStopList()
     for stop in stops:
-      tripgraph.add_tripstop(str("gtfs" + stop.stop_id), "gtfs", stop.stop_lat, 
+      tripgraph.add_tripstop(int(stop.stop_id), "gtfs", stop.stop_lat, 
                         stop.stop_lon)
       
     trips = sched.GetTripList()
@@ -24,22 +24,30 @@ def load_gtfs(tripgraph, sched):
             print "WARNING: Negative edge in gtfs. This probably means you "
             "need a more recent version of the google transit feed " 
             "package (see README)"
-          tripgraph.add_triphop(prevsecs, secs, str("gtfs"+prevstop.stop_id),
-                                str("gtfs"+stop.stop_id), int(trip.route_id), 
+          tripgraph.add_triphop(prevsecs, secs, int(prevstop.stop_id),
+                                int(stop.stop_id), int(trip.route_id), 
                                 int(trip.trip_id), str(trip.service_id))        
         prevstop = stop
         prevsecs = secs
 
-def load_osm(tripgraph, map):
+def load_osm(tripgraph, map, startid):
+    # map of osm ids -> libroutez ids. libroutez ids are positive integers, 
+    # starting from the last gtfs id. I'm assuming that OSM ids can be pretty 
+    # much anything
+    nodemap = {}
+    curid = startid
+
     for node in map.nodes.values():
-        tripgraph.add_tripstop(str("osm"+node.id), str("osm"), node.lat, node.lon)
+        nodemap[node.id] = curid
+        tripgraph.add_tripstop(curid, "osm", node.lat, node.lon)
+        curid += 1
         
     for way in map.ways.values():
         prev_id = None
         for id in way.nds:
             if prev_id:
-                tripgraph.add_walkhop(str("osm"+prev_id), str("osm"+id))
-                tripgraph.add_walkhop(str("osm"+id), str("osm"+prev_id))
+                tripgraph.add_walkhop(nodemap[prev_id], nodemap[id])
+                tripgraph.add_walkhop(nodemap[id], nodemap[prev_id])
             prev_id = id
 
 if __name__ == '__main__':
@@ -57,7 +65,7 @@ if __name__ == '__main__':
     print "Inserting gtfs into graph"
     load_gtfs(g, schedule)
     print "Inserting osm into graph"
-    load_osm(g, map)
+    load_osm(g, map, len(schedule.GetStopList()))
     print "Linking osm with gtfs"
     g.link_osm_gtfs()
     print "Saving graph"

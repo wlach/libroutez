@@ -38,7 +38,7 @@ static double distance(double src_lat, double src_lng, double dest_lat, double d
 }
 
 
-TripAction::TripAction(const char *_src_id, const char *_dest_id, 
+TripAction::TripAction(int32_t _src_id, int32_t _dest_id, 
                        int _route_id, double _start_time, double _end_time) :
     src_id(_src_id),
     dest_id(_dest_id),

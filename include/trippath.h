@@ -8,7 +8,7 @@
 
 struct TripAction
 {
-    TripAction(const char *_src_id, const char *_dest_id, int _route_id, 
+    TripAction(int32_t _src_id, int32_t _dest_id, int _route_id, 
                double _start_time, double _end_time);
     TripAction() {} // for swig, which wants to call resize for some dumb reason
     TripAction(const TripAction &other);
@@ -16,7 +16,7 @@ struct TripAction
 
     TripAction &operator=(const TripAction &other);
 
-    std::string src_id, dest_id;
+    int32_t src_id, dest_id;
     float start_time, end_time;
     int route_id;
 
