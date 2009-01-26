@@ -51,11 +51,15 @@ struct TripStop
     int32_t id;
     char type[MAX_ID_LEN];
     float lat, lng;
+    
     typedef std::vector<boost::shared_ptr<TripHop> > TripHopList;
     typedef boost::unordered_map<int, TripHopList> TripHopDict;
     typedef boost::unordered_map<std::string, TripHopDict> ServiceDict;
     typedef boost::unordered_map<int32_t, float> WalkHopDict;
-    ServiceDict tdict;
+
+    // we keep a pointer to a tdict, as most nodes won't have one and we
+    // don't want the memory overhead of one if not strictly needed
+    boost::shared_ptr<ServiceDict> tdict;
     WalkHopDict wdict;
 };
 
