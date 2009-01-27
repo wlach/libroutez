@@ -69,11 +69,13 @@ void TripGraph::load(string fname)
         return;
     }
         
+    tripstops.reserve(num_tripstops);
     uint32_t i = 0;
     while (i < num_tripstops)
     {
         shared_ptr<TripStop> s(new TripStop(fp));
-        tripstops.insert(pair<int32_t,shared_ptr<TripStop> >(s->id, s));
+        assert(tripstops.size() == s->id);
+        tripstops.push_back(s);
         i++;
     }
 
@@ -94,10 +96,10 @@ void TripGraph::save(string fname)
     // write triphops
     uint32_t num_tripstops = tripstops.size();
     assert(fwrite(&num_tripstops, sizeof(uint32_t), 1, fp) == 1);
-    for (TripStopDict::iterator i = tripstops.begin();
+    for (TripStopList::iterator i = tripstops.begin();
          i != tripstops.end(); i++)
     {
-        i->second->write(fp);
+        (*i)->write(fp);
     }
 
     fclose(fp);
@@ -116,8 +118,10 @@ void TripGraph::add_triphop(int32_t start_time, int32_t end_time,
 
 void TripGraph::add_tripstop(int32_t id, string type, float lat, float lng)
 {
-    shared_ptr<TripStop> s(new TripStop(id, type, lat, lng));
-    tripstops.insert(pair<int32_t,shared_ptr<TripStop> >(id, s));
+    // id must equal size of tripstops
+    assert(id == tripstops.size());
+
+    tripstops.push_back(shared_ptr<TripStop>(new TripStop(id, type, lat, lng)));
 }
 
 
@@ -174,14 +178,14 @@ void TripGraph::link_osm_gtfs()
 
     int tripstop_count = 0;
     int tripstop_total = tripstops.size();
-    for (TripStopDict::iterator i = tripstops.begin(); 
+    for (TripStopList::iterator i = tripstops.begin(); 
          i != tripstops.end(); i++)
     {
         tripstop_count++;
         // For each GTFS stop...
-        if (strcmp(i->second->type, "gtfs") == 0)
+        if (strcmp((*i)->type, "gtfs") == 0)
         {
-            Point gtfs_pt(i->second->lat, i->second->lng);
+            Point gtfs_pt((*i)->lat, (*i)->lng);
             
             pair<int32_t, int32_t> nearest_walkhop(-1, -1);
             double min_dist;
@@ -195,13 +199,13 @@ void TripGraph::link_osm_gtfs()
             // Another idea is to put a bounding box around each tripstop and
             // its associated walkhops, saving us from having to examine each
             // walkhop of some faraway triphop.
-            for (TripStopDict::iterator j = tripstops.begin(); 
+            for (TripStopList::iterator j = tripstops.begin(); 
                  j != tripstops.end(); j++)
             {
-                for (TripStop::WalkHopList::iterator k = j->second->wlist.begin(); 
-                     k != j->second->wlist.end(); k++)
+                for (TripStop::WalkHopList::iterator k = (*j)->wlist.begin(); 
+                     k != (*j)->wlist.end(); k++)
                 {
-                    Point trip_pt(j->second->lat, j->second->lng);
+                    Point trip_pt((*j)->lat, (*j)->lng);
 
                     shared_ptr<TripStop> dest_stop = _get_tripstop(k->dest_id);
                     Point walk_pt(dest_stop->lat, dest_stop->lng);
@@ -218,12 +222,12 @@ void TripGraph::link_osm_gtfs()
                         // If the GTFS stop is on one of the OSM nodes, use
                         // that node.  Otherwise remember both nodes.
                         if (trip_pt == p)
-                            nearest_walkhop.first = j->first;
+                            nearest_walkhop.first = (*j)->id;
                         else if (walk_pt == p)
                             nearest_walkhop.first = k->dest_id;
                         else
                         {
-                            nearest_walkhop.first = j->first;
+                            nearest_walkhop.first = (*j)->id;
                             nearest_walkhop.second = k->dest_id;
                         }
 
@@ -232,10 +236,10 @@ void TripGraph::link_osm_gtfs()
                 }
             }
             
-            new_walkhops[i->first] = nearest_walkhop;
+            new_walkhops[(*i)->id] = nearest_walkhop;
             printf("%02.2f%% done: Linking %d -> %d, %d\n", 
                     ((float)tripstop_count * 100.0f) / ((float)tripstop_total),
-                    i->first, 
+                    (*i)->id, 
                     nearest_walkhop.first, 
                     nearest_walkhop.second);
         }
@@ -268,14 +272,13 @@ shared_ptr<TripStop> TripGraph::get_nearest_stop(double lat, double lng)
     
     shared_ptr<TripStop> closest_stop;
     double min_dist = 0.0f;
-    for (TripStopDict::iterator i = tripstops.begin(); 
+    for (TripStopList::iterator i = tripstops.begin(); 
          i != tripstops.end(); i++)
     {
-        shared_ptr<TripStop> s = i->second;
-        double dist = pow((s->lat - lat), 2) + pow((s->lng - lng), 2);
+        double dist = pow(((*i)->lat - lat), 2) + pow(((*i)->lng - lng), 2);
         if (!closest_stop || dist < min_dist)
         {
-            closest_stop = s;
+            closest_stop = (*i);
             min_dist = dist;
         }
     }
@@ -362,10 +365,9 @@ TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
 
 shared_ptr<TripStop> TripGraph::_get_tripstop(int32_t id)
 {
-    TripStopDict::iterator ts = tripstops.find(id);
-    assert(ts != tripstops.end());
+    assert(id < tripstops.size());
 
-    return ts->second;
+    return tripstops[id];
 }
 
 
