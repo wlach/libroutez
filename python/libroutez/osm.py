@@ -138,7 +138,11 @@ class OSM:
                 del self.ways[way.id]
             else:
                 for node in way.nds:
-                    node_histogram[node] += 1
+                    # toss out any ways that don't have all nodes on map
+                    if not self.nodes.get(node) and self.ways.get(way.id):
+                        del self.ways[way.id]
+                    elif self.ways.get(way.id):
+                        node_histogram[node] += 1
 
         # delete nodes that don't appear in ways
         for node in self.nodes.values():
