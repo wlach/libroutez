@@ -28,10 +28,12 @@ class TripGraph
 
     TripStop get_tripstop(int32_t id);
 
-    TripPath find_path(int secs, std::string service_period, bool walkonly,
-                       double src_lat, double src_lng, 
-                       double dest_lat, double dest_lng);
-
+#ifdef SWIG
+    %newobject find_path;
+#endif
+    TripPath * find_path(int secs, std::string service_period, bool walkonly,
+                         double src_lat, double src_lng, 
+                         double dest_lat, double dest_lng);
     // various internal types
     struct PathCompare
     {

@@ -294,7 +294,7 @@ TripStop TripGraph::get_tripstop(int32_t id)
 }
 
 
-TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
+TripPath * TripGraph::find_path(int secs, string service_period, bool walkonly,
                               double src_lat, double src_lng, 
                               double dest_lat, double dest_lng)
 {
@@ -306,7 +306,11 @@ TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
 
     shared_ptr<TripStop> start_node = get_nearest_stop(src_lat, src_lng);
     shared_ptr<TripStop> end_node = get_nearest_stop(dest_lat, dest_lng);
-    DEBUGPATH("Start: %s End: %s\n", start_node->id, end_node->id);
+    DEBUGPATH("Find path. Secs: %s service period: %s walkonly: %d "
+              "src lat: %f src lng: %f dest_lat: %f dest_lng: %f\n",
+              secs, service_period.c_str(), walkonly, src_lat, src_lng,
+              dest_lat, dest_lng);
+    DEBUGPATH("- Start: %d End: %d\n", start_node->id, end_node->id);
 
     // Consider the distance required to reach the start node from the 
     // beginning, and add that to our start time.
@@ -314,52 +318,48 @@ TripPath TripGraph::find_path(int secs, string service_period, bool walkonly,
                                       start_node->lat, start_node->lng);
     secs += (int)(dist_from_start / est_walk_speed);
     
-    DEBUGPATH("Start time - %d\n", secs);
+    DEBUGPATH("- Start time - %d\n", secs);
     shared_ptr<TripPath> start_path(new TripPath(secs, est_walk_speed, 
                                                  end_node, start_node));
     if (start_node == end_node)
-        return TripPath(*start_path);
+        return new TripPath(*start_path);
 
     uncompleted_paths.push(start_path);
 
-    TripPath best_completed_path;
+    TripPath *best_completed_path;
 
-    for (int i=0; i<3; i++)
+    int num_paths_considered = 0;
+
+    while (uncompleted_paths.size() > 0)
     {
-        int num_paths_considered = 0;
-
-        while (uncompleted_paths.size() > 0)
+        DEBUGPATH("Continuing\n");
+        shared_ptr<TripPath> path = uncompleted_paths.top();
+        uncompleted_paths.pop();
+        extend_path(path, service_period, walkonly, end_node->id, 
+                    num_paths_considered, visited_routes, visited_walks, 
+                    uncompleted_paths, completed_paths);
+        
+        // If we've still got open paths, but their weight exceeds that
+        // of the weight of a completed path, break.
+        if (uncompleted_paths.size() > 0 && completed_paths.size() > 0 &&
+            uncompleted_paths.top()->heuristic_weight > 
+            completed_paths.top()->heuristic_weight)
         {
-            shared_ptr<TripPath> path = uncompleted_paths.top();
-            uncompleted_paths.pop();
-            extend_path(path, service_period, walkonly, end_node->id, 
-                        num_paths_considered, visited_routes, visited_walks, 
-                        uncompleted_paths, completed_paths);
-
-            // If we've still got open paths, but their weight exceeds that
-            // of the weight of a completed path, break.
-            if (uncompleted_paths.size() > 0 && completed_paths.size() > 0 &&
-                uncompleted_paths.top()->heuristic_weight > 
-                completed_paths.top()->heuristic_weight)
-            {
-                DEBUGPATH("Breaking with %d uncompleted paths (paths "
-                          "considered: %d).\n", uncompleted_paths.size(), 
-                          num_paths_considered);
-                return TripPath(*(completed_paths.top()));
-            }
-
-            //if len(completed_paths) > 0 and len(uncompleted_paths) > 0:
-            //  print "Weight of best completed path: %s, uncompleted: %s" % \
-            //      (completed_paths[0].heuristic_weight, uncompleted_paths[0].heuristic_weight)
+            DEBUGPATH("Breaking with %d uncompleted paths (paths "
+                      "considered: %d).\n", uncompleted_paths.size(), 
+                      num_paths_considered);
+            return new TripPath(*(completed_paths.top()));
         }
-
-        if (completed_paths.size())
-            best_completed_path = TripPath(*(completed_paths.top()));
+        
+        //if len(completed_paths) > 0 and len(uncompleted_paths) > 0:
+        //  print "Weight of best completed path: %s, uncompleted: %s" % \
+        //      (completed_paths[0].heuristic_weight, uncompleted_paths[0].heuristic_weight)
     }
+    
+    if (completed_paths.size())
+        return new TripPath(*(completed_paths.top()));
 
-    return best_completed_path;
-
-    return TripPath();
+    return NULL;
 }
 
 
@@ -398,7 +398,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
     }
 #endif
     
-    DEBUGPATH("Extending path at vertex %s (on %d) @ %f (walktime: %f, "
+    DEBUGPATH("Extending path at vertex %d (on %d) @ %f (walktime: %f, "
               "routetime:%f)\n", src_id, last_route_id, path->time, 
               path->walking_time, path->route_time);
     shared_ptr<TripStop> src_stop = _get_tripstop(src_id);
@@ -434,14 +434,14 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
             shared_ptr<TripPath> path2 = path->add_action(
                 action, outgoing_route_ids, ds);
 
-            DEBUGPATH("- Considering walkpath to %s\n", dest_id);
+            DEBUGPATH("- Considering walkpath to %d\n", dest_id);
 
             if (v1 == vsrc.end() || 
                 v1->second->heuristic_weight > path2->heuristic_weight ||
                 ((v1->second->heuristic_weight - path2->heuristic_weight) < 1.0f &&
                  v1->second->walking_time > path2->walking_time))
             {
-                DEBUGPATH("-- Adding walkpath to %s\n", dest_id);
+                DEBUGPATH("-- Adding walkpath to %d\n", dest_id);
                 if (dest_id == goal_id)
                     completed_paths.push(path2);
                 else

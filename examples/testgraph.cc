@@ -34,13 +34,22 @@ int main(int argc, char *argv[])
     int start_time = atoi(argv[6]);
     string service_period = argv[7];
 
+    printf("Loading graph...\n");
     TripGraph g;
     g.load(argv[1]);
 
-    TripPath p = g.find_path(start_time, service_period, false, src_lat, 
+    while (1) sleep(1);
+
+    printf("Calculating path...\n");
+    TripPath *p = g.find_path(start_time, service_period, false, src_lat, 
                              src_lng, dest_lat, dest_lng);
 
-    print_actions(p.last_action);
+    if (p)
+        print_actions(p->last_action);
+    else
+        printf("Couldn't find path.\n");
+
+    delete p;
 
     return 0;
 }
