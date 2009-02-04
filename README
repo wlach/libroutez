@@ -17,10 +17,13 @@ algorithms. For example, though libroutez uses the astar algorithm internally,
 we try to expose the interface to that through a simple method called
 "find_path". 
 - Be extensible, but only in response to demonstrative developer need. 
-- Be fast. Routez uses an internal graph representation that, after being 
+- Be fast. libroutez uses an internal graph representation that, after being 
 generated, can be loaded very quickly on program startup. Trips on a modest 
 sized transit network can be generated in a fraction of a second on modern 
 hardware (and there are plans to speed things up further).
+- Minimize memory use. Obviously the scale of public transit systems will
+incur some overhead here, but we want to be maximally useful on embedded
+systems and virtual servers where such resources may be scarce.
 - Minimize dependancies. For example, we don't assume the user wants to use a 
 PostGRES database to store trip planning data (though they can if the want to).
 libroutez itself has no run-time dependancies beyond the C++ standard library.
@@ -89,7 +92,8 @@ is used to create this.
 The invocation is pretty simple. If you want to create a graph file called
 'mygraph.routez', simply invoke creategraph.py as follows:
 
-   ./creategraph.py /path/to/gtfsfeed.zip /path/to/osmfile.osm mygraph.routez
+   ./creategraph.py /path/to/gtfsfeed.zip /path/to/osmfile.osm mygraph.routez \
+   mygraph-gtfsmapping.yml
 
 Want some sample data to play with? You can download the combination of
 William Lachance's Halifax GTFS and Geobase data:
@@ -117,7 +121,10 @@ Halifax, Nova Scotia, Canada:
 You should get a bunch of directions in "routezspeak" in response. :) Note that
 no attempt is currently made to prettify the output, but hopefully this will at
 least give you a starting point (perhaps that would be a fun little first 
-project for someone who wants to contribute?).
+project for someone who wants to contribute?). Correlating the descriptive
+information contained within a Google Transit feed with libroutez's internal
+data structures will necessitate using the gtfs mapping yaml file generated
+by the creategraph utility.
 
 For those who like programming in ruby and python, there are examples of both 
 in the same directory as 'testgraph'.
