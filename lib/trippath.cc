@@ -116,10 +116,12 @@ void TripPath::_get_heuristic_weight()
         heuristic_weight += (pow(2.0f, (int)(traversed_route_ids-2)) * 5.0f * 60.0f);
         
     // double the cost of walking after 5 mins, quadruple after 10 mins, 
-    // octuple after 15, etc.
+    // octuple after 15, etc. (up to a maximum of 20 iterations of this, to
+    // make sure we don't freeze for particularly long walking times-- mostly
+    // useful for obscure test cases)
     double excess_walking_time = walking_time - 300.0f;
     int iter = 0;
-    while (excess_walking_time > 0) 
+    while (excess_walking_time > 0 && iter < 20) 
     {
         double iter_walking_time = 0;
         if (excess_walking_time > 300.0f)
