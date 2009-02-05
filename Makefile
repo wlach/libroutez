@@ -14,11 +14,14 @@ config.mk:
 	@echo "Please run ./configure. Stop."
 	@exit 1
 
-%.o: %.cc
+%.o: %.cc 
 	g++ $< -c -o $@ $(CXXFLAGS) $(PYTHON_CFLAGS) $(RUBY_CFLAGS) -I./include -g
-
-%.o: %.cc %.h
-	g++ $< -c -o $@ $(CXXFLAGS) $(PYTHON_CFLAGS) $(RUBY_CFLAGS) -I./include -g
+	@g++ $< -MM $(CXXFLAGS) $(PYTHON_CFLAGS) $(RUBY_CFLAGS) -I./include > $*.d
+	@mv -f $*.d $*.d.tmp
+	@sed -e 's|.*:|$*.o:|' < $*.d.tmp > $*.d
+	@sed -e 's/.*://' -e 's/\\$$//' < $*.d.tmp | fmt -1 | \
+	  sed -e 's/^ *//' -e 's/$$/:/' >> $*.d
+	@rm -f $*.d.tmp
 
 TRIPGRAPH_OBJECTS=lib/tripgraph.o lib/trippath.o lib/tripstop.o 
 
@@ -57,4 +60,6 @@ clean:
 	python/libroutez/_tripgraph.so python/libroutez/tripgraph.py \
 	python/libroutez/tripgraph_wrap_py.cc python/libroutez/*.o \
 	ruby/routez.so ruby/*.o ruby/routez_wrap_rb.cc \
-	t/*.o t/all.t
+	t/*.o t/all.t *.d
+
+include $(TRIPGRAPH_OBJECTS:.o=.d)
