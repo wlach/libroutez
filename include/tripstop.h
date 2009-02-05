@@ -44,7 +44,7 @@ struct WalkHop
     }
 
     int32_t dest_id;
-    double walktime;
+    float walktime;
 };
 
 

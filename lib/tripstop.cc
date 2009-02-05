@@ -32,6 +32,7 @@ TripStop::TripStop(FILE *fp)
             assert(fread(&route_id, sizeof(int32_t), 1, fp) == 1);
             TripHop *t = new TripHop;
             assert(fread(t, sizeof(TripHop), 1, fp) == 1);
+            assert(t->end_time >= t->start_time); // FIXME: should be >, no?
             (*tdict)[service_period][route_id].push_back(shared_ptr<TripHop>(t));
         }
     }
@@ -44,6 +45,7 @@ TripStop::TripStop(FILE *fp)
         float walktime;
         assert(fread(&dest_id, sizeof(int32_t), 1, fp) == 1);
         assert(fread(&walktime, sizeof(float), 1, fp) == 1);
+        assert(walktime >= 0.0f); // FIXME, should be >, no?
         add_walkhop(dest_id, walktime);
     }
 }
@@ -107,8 +109,7 @@ void TripStop::write(FILE *fp)
     assert(fwrite(&num_walkhops, sizeof(uint32_t), 1, fp) == 1);
     for (WalkHopList::iterator i = wlist.begin(); i != wlist.end(); i++)
     {
-        assert(fwrite(&i->dest_id, sizeof(int32_t), 1, fp) == 1);
-        assert(fwrite(&i->walktime, sizeof(float), 1, fp) == 1);
+        assert(fwrite(&(*i), sizeof(WalkHop), 1, fp) == 1);
     }
 }
 
