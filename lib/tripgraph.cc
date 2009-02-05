@@ -218,7 +218,7 @@ void TripGraph::link_osm_gtfs()
                     if ((nearest_walkhop.first == (-1) && 
                          nearest_walkhop.second == (-1)) || dist < min_dist)
                     {
-                        nearest_walkhop = pair<int32_t,int32_t>();
+                        nearest_walkhop = pair<int32_t,int32_t>(-1, -1);
                         // If the GTFS stop is on one of the OSM nodes, use
                         // that node.  Otherwise remember both nodes.
                         if (trip_pt == p)
