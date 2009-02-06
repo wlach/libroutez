@@ -62,4 +62,4 @@ clean:
 	ruby/routez.so ruby/*.o ruby/routez_wrap_rb.cc \
 	t/*.o t/all.t *.d
 
-include $(TRIPGRAPH_OBJECTS:.o=.d)
+-include $(TRIPGRAPH_OBJECTS:.o=.d)
