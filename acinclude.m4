@@ -136,7 +136,7 @@ ax_python_bin=$PYTHON_BIN
 if test x$ax_python_bin != x; then
    AC_CHECK_LIB($ax_python_bin, main, ax_python_lib=$ax_python_bin, ax_python_lib=no)
    AC_CHECK_HEADER([$ax_python_bin/Python.h],
-   [[ax_python_header=`locate $ax_python_bin/Python.h | sed -e s,/Python.h,,`]],
+   [[ax_python_header=`locate $ax_python_bin/Python.h | sed -e s,/Python.h,, | tail -1`]],
    ax_python_header=no)
    if test "$ax_python_lib" != no; then
      if test "$ax_python_header" != no; then
@@ -145,13 +145,13 @@ if test x$ax_python_bin != x; then
    fi
 fi
 done
-if test x$ax_python_bin = x; then
+if test "x$ax_python_bin" = x; then
    ax_python_bin=no
 fi
-if test x$ax_python_header = x; then
+if test "x$ax_python_header" = x; then
    ax_python_header=no
 fi
-if test x$ax_python_lib = x; then
+if test "x$ax_python_lib" = x; then
    ax_python_lib=no
 fi
 
@@ -160,11 +160,11 @@ AC_MSG_RESULT([    Binary:      $ax_python_bin])
 AC_MSG_RESULT([    Library:     $ax_python_lib])
 AC_MSG_RESULT([    Include Dir: $ax_python_header])
 
-if test x$ax_python_header != xno; then
+if test "x$ax_python_header" != xno; then
   PYTHON_INCLUDE_DIR=$ax_python_header
   AC_SUBST(PYTHON_INCLUDE_DIR)
 fi
-if test x$ax_python_lib != xno; then
+if test "x$ax_python_lib" != xno; then
   PYTHON_LIB=$ax_python_lib
   AC_SUBST(PYTHON_LIB)
 fi
