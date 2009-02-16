@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.57)
-AC_INIT(libroutez)
+AC_INIT(libroutez, 0.1.0, libroutez@googlegroups.com, libroutez)
 AC_CONFIG_SRCDIR(lib/tripgraph.cc)
 
 AC_PROG_CC
