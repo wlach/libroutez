@@ -8,6 +8,29 @@ AC_PROG_CXX
 AC_PROG_CPP
 AC_PROG_CXXCPP
 AC_PROG_INSTALL
+
+# Detect target build environment
+AC_CANONICAL_TARGET
+case "$target" in
+    *-linux*)
+        OS="LINUX"
+	;;
+    *-sunos*|*-solaris*)
+	OS="SOLARIS"
+	;;
+    *-win*)
+    	OS="WIN32"
+    	;;
+    *-apple*)
+    	OS="MACOS"
+    	;;
+    *)
+    	OS="OTHER"
+	;;
+esac
+
+AC_SUBST(OS)
+
 AX_PYTHON
 AX_WITH_RUBY
 AX_RUBY_DEVEL
