@@ -38,8 +38,6 @@ int main(int argc, char *argv[])
     TripGraph g;
     g.load(argv[1]);
 
-    while (1) sleep(1);
-
     printf("Calculating path...\n");
     TripPath *p = g.find_path(start_time, service_period, false, src_lat, 
                              src_lng, dest_lat, dest_lng);
