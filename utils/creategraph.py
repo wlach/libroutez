@@ -53,10 +53,11 @@ def load_gtfs(tripgraph, sched, idmap):
             print "WARNING: Negative edge in gtfs. This probably means you "
             "need a more recent version of the google transit feed " 
             "package (see README)"
-          if not idmap.tripmap.get(trip.trip_id):
+          if not idmap.tripmap.has_key(trip.trip_id):
               idmap.tripmap[trip.trip_id] = len(idmap.tripmap)
-          if not idmap.routemap.get(trip.route_id):
+          if not idmap.routemap.has_key(trip.route_id):
               idmap.routemap[trip.route_id] = len(idmap.routemap)
+
           tripgraph.add_triphop(prevsecs, secs, idmap.stopmap[prevstop.stop_id],
                                 idmap.stopmap[stop.stop_id], 
                                 idmap.routemap[trip.route_id], 
