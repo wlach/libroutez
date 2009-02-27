@@ -306,7 +306,7 @@ TripPath * TripGraph::find_path(int secs, string service_period, bool walkonly,
 
     shared_ptr<TripStop> start_node = get_nearest_stop(src_lat, src_lng);
     shared_ptr<TripStop> end_node = get_nearest_stop(dest_lat, dest_lng);
-    DEBUGPATH("Find path. Secs: %s service period: %s walkonly: %d "
+    DEBUGPATH("Find path. Secs: %d service period: %s walkonly: %d "
               "src lat: %f src lng: %f dest_lat: %f dest_lng: %f\n",
               secs, service_period.c_str(), walkonly, src_lat, src_lng,
               dest_lat, dest_lng);
