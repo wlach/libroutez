@@ -54,7 +54,7 @@ examples/testgraph: examples/testgraph.o libroutez.so
 	g++ $< -o $@ libroutez.so -fPIC -g -I./include
 
 # unit test suite
-TEST_OBJS=t/tripgraph.t.o t/all.t.o
+TEST_OBJS=t/tripgraph.t.o t/tripstop.t.o t/all.t.o
 t/all.t: $(TEST_OBJS) libroutez.so
 	g++ $(TEST_OBJS) -o $@ libroutez.so -fPIC -g
 

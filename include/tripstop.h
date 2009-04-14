@@ -62,6 +62,8 @@ struct TripStop
     boost::unordered_set<int> get_routes(std::string service_id);
     boost::shared_ptr<TripHop> find_triphop(int time, int route_id, 
                                             std::string service_period);
+    std::vector<boost::shared_ptr<TripHop> > find_triphops(
+        int time, int route_id, std::string service_period, int num);
 
     int32_t id;
     char type[MAX_ID_LEN];
