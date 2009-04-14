@@ -164,7 +164,7 @@ list<TripAction> TripPath::get_actions()
 }
 
 shared_ptr<TripPath> TripPath::add_action(shared_ptr<TripAction> &action, 
-                            unordered_set<int> &_possible_route_ids,
+                            list<int> &_possible_route_ids,
                             shared_ptr<TripStop> &_last_stop)
 {
     shared_ptr<TripPath> new_trippath(new TripPath(*this));
@@ -194,7 +194,7 @@ shared_ptr<TripPath> TripPath::add_action(shared_ptr<TripAction> &action,
         }
     }
 
-    for (unordered_set<int>::iterator i = _possible_route_ids.begin(); 
+    for (list<int>::iterator i = _possible_route_ids.begin(); 
          i != _possible_route_ids.end(); i++)
     {
         new_trippath->possible_route_ids.insert(*i);

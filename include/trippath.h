@@ -35,7 +35,7 @@ struct TripPath
 
     boost::shared_ptr<TripPath> add_action(
         boost::shared_ptr<TripAction> &action, 
-        boost::unordered_set<int> &_possible_route_ids,
+        std::list<int> &_possible_route_ids,
         boost::shared_ptr<TripStop> &_last_stop);
 
     // the following are mostly for the benefit of language bindings

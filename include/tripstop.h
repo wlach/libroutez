@@ -3,7 +3,6 @@
 #include <assert.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
-#include <boost/unordered_set.hpp>
 #include <string.h>
 #include <string>
 #include <stdint.h>
@@ -59,11 +58,12 @@ struct TripStop
     void add_triphop(int32_t start_time, int32_t end_time, int32_t dest_id, 
                      int32_t route_id, int32_t trip_id, std::string service_id);
     void add_walkhop(int32_t dest_id, float walktime);
-    boost::unordered_set<int> get_routes(std::string service_id);
+    std::list<int> get_routes(std::string service_id);
     boost::shared_ptr<TripHop> find_triphop(int time, int route_id, 
                                             std::string service_period);
-    std::vector<boost::shared_ptr<TripHop> > find_triphops(
+    std::vector<TripHop> find_triphops(
         int time, int route_id, std::string service_period, int num);
+ 
 
     int32_t id;
     char type[MAX_ID_LEN];

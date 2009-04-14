@@ -405,7 +405,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
 
     // Keep track of outgoing route ids at this node: make sure that we 
     // don't get on a route later when we could have gotten on here.
-    unordered_set<int> outgoing_route_ids = src_stop->get_routes(service_period);
+    list<int> outgoing_route_ids = src_stop->get_routes(service_period);
 
     // Explore walkhops that are better than the ones we've already visited.
     // If we're on a bus, don't allow a transfer if we've been on for
@@ -460,7 +460,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
         return;
 
     // Find outgoing triphops from the source and get a list of paths to them. 
-    for (unordered_set<int>::iterator i = outgoing_route_ids.begin();
+    for (list<int>::iterator i = outgoing_route_ids.begin();
          i != outgoing_route_ids.end(); i++)
     {
         int LEEWAY = 0;

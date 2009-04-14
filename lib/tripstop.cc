@@ -160,12 +160,11 @@ shared_ptr<TripHop> TripStop::find_triphop(int time, int route_id,
 }
 
 
-vector<shared_ptr<TripHop> > TripStop::find_triphops(int time, int route_id,
-                                                    string service_id, 
-                                                     int num)
+vector<TripHop> TripStop::find_triphops(int time, int route_id,
+                                        string service_id, 
+                                        int num)
 {
-
-    vector<shared_ptr<TripHop> > tlist;
+    vector<TripHop> tlist;
 
     if (tdict) 
     {
@@ -174,7 +173,7 @@ vector<shared_ptr<TripHop> > TripStop::find_triphops(int time, int route_id,
              i++)
         {
             if ((*i)->start_time >= time)
-                tlist.push_back((*i));
+                tlist.push_back(*(*i));
         }
     }
 
@@ -182,16 +181,16 @@ vector<shared_ptr<TripHop> > TripStop::find_triphops(int time, int route_id,
 }
 
 
-unordered_set<int> TripStop::get_routes(std::string service_id)
+list<int> TripStop::get_routes(std::string service_id)
 {
-    unordered_set<int> routes;
+    list<int> routes;
 
     if (tdict) 
     {
         for (TripHopDict::iterator i = (*tdict)[service_id].begin();
              i != (*tdict)[service_id].end(); i++)
         {
-            routes.insert(i->first);
+            routes.push_back(i->first);
         }
     }
 
