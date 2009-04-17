@@ -1,6 +1,9 @@
 #include <boost/test/unit_test.hpp>
 #include "tripgraph.h"
 
+using namespace std;
+
+
 BOOST_AUTO_TEST_CASE(basic_graph_pathfinding)
 {
     TripGraph g;
@@ -84,3 +87,27 @@ BOOST_AUTO_TEST_CASE(impossible_path)
     TripPath *p = g.find_path(0, "caturday", false, 0.0, 0.0, 0.0, 1.0);
     BOOST_CHECK(!p);
 }
+
+
+BOOST_AUTO_TEST_CASE(tripstops_in_range)
+{
+    TripGraph g;
+    // north and agricola
+    g.add_tripstop(0, "gtfs", 44.6554236f, -63.5936968f);
+    // north and robie (just north of north&agricola)
+    g.add_tripstop(1, "osm", 44.6546407f, -63.5948438f);
+    // north and northwood (just south of north&agricola)
+    g.add_tripstop(2, "gtfs", 44.6567144f, -63.5919115f);
+    // Quinpool and Connaught (a few kms away from north&agricola)
+    g.add_tripstop(2, "gtfs", 44.6432423f, -63.6045261f);
+
+    {
+        vector<TripStop> v = g.find_tripstops_in_range(44.6554236f, 
+                                                       -63.5936968f, "gtfs", 
+                                                       500.0f);      
+        BOOST_CHECK_EQUAL(v.size(), 2);
+        BOOST_CHECK(v[0].id == 0 || v[0].id == 2);
+        BOOST_CHECK(v[1].id == 0 || v[1].id == 2);
+    }
+}
+

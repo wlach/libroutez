@@ -518,3 +518,24 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
         }
     }
 }    
+
+
+vector<TripStop> TripGraph::find_tripstops_in_range(double lat, double lng, 
+                                                    const char *type,
+                                                    double range)
+{
+    vector<TripStop> tripstops_in_range;
+
+    for (TripStopList::iterator i = tripstops.begin(); 
+         i != tripstops.end(); i++)
+    {
+        if (strcmp((*i)->type, type) != 0)
+            continue;
+
+        double dist = distance((*i)->lat, (*i)->lng, lat, lng);
+        if (dist <= range)
+            tripstops_in_range.push_back(*(*i));
+    }
+
+    return tripstops_in_range;
+}

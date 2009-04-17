@@ -51,6 +51,10 @@ class TripGraph
     
     typedef std::vector<boost::shared_ptr<TripStop> > TripStopList;
 
+    std::vector<TripStop> find_tripstops_in_range(double lat, double lng, 
+                                                  const char * type,
+                                                  double range);
+
   private:
     // internal copy of get_tripstop: returns a pointer, not a copy, so
     // much faster (when called many times)
