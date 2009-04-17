@@ -14,26 +14,26 @@ BOOST_AUTO_TEST_CASE(get_multiple_triphops)
     t.add_triphop(600, 650, 0, 0, 0, "sunday");
 
     // Ask for three
-    vector<shared_ptr<TripHop> > v = t.find_triphops(499, 0, "caturday", 
+    vector<TripHop> v = t.find_triphops(499, 0, "caturday", 
                                                      3);
     BOOST_CHECK_EQUAL(v.size(), 3);
-    BOOST_CHECK_EQUAL(v[0]->start_time, 500);
-    BOOST_CHECK_EQUAL(v[1]->start_time, 550);
-    BOOST_CHECK_EQUAL(v[2]->start_time, 600);
+    BOOST_CHECK_EQUAL(v[0].start_time, 500);
+    BOOST_CHECK_EQUAL(v[1].start_time, 550);
+    BOOST_CHECK_EQUAL(v[2].start_time, 600);
 
     v = t.find_triphops(499, 0, "caturday", 2);
     BOOST_CHECK_EQUAL(v.size(), 2);
-    BOOST_CHECK_EQUAL(v[0]->start_time, 500);
-    BOOST_CHECK_EQUAL(v[1]->start_time, 550);
+    BOOST_CHECK_EQUAL(v[0].start_time, 500);
+    BOOST_CHECK_EQUAL(v[1].start_time, 550);
 
     v = t.find_triphops(499, 0, "caturday", 4);
     BOOST_CHECK_EQUAL(v.size(), 3);
-    BOOST_CHECK_EQUAL(v[0]->start_time, 500);
-    BOOST_CHECK_EQUAL(v[1]->start_time, 550);
-    BOOST_CHECK_EQUAL(v[2]->start_time, 600);
+    BOOST_CHECK_EQUAL(v[0].start_time, 500);
+    BOOST_CHECK_EQUAL(v[1].start_time, 550);
+    BOOST_CHECK_EQUAL(v[2].start_time, 600);
 
     v = t.find_triphops(551, 0, "caturday", 2);
     BOOST_CHECK_EQUAL(v.size(), 1);
-    BOOST_CHECK_EQUAL(v[0]->start_time, 600);
+    BOOST_CHECK_EQUAL(v[0].start_time, 600);
 
 }
