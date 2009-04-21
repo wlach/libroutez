@@ -14,7 +14,7 @@ static bool operator<(const TripHop& x, const TripHop& y)
 TripStop::TripStop(FILE *fp) 
 {
     assert(fread(&id, sizeof(int32_t), 1, fp) == 1);
-    assert(fread(type, 1, MAX_ID_LEN, fp) == MAX_ID_LEN);
+    assert(fread(&type, sizeof(Type), 1, fp) == 1);
     assert(fread(&lat, sizeof(float), 1, fp) == 1);
     assert(fread(&lng, sizeof(float), 1, fp) == 1);
         
@@ -51,13 +51,10 @@ TripStop::TripStop(FILE *fp)
 }
 
 
-TripStop::TripStop(int32_t _id, string _type, float _lat, float _lng) 
+TripStop::TripStop(int32_t _id, Type _type, float _lat, float _lng) 
 {
     id = _id;
-
-    assert(_type.length() < MAX_ID_LEN);
-    strcpy(type, _type.c_str());
-    
+    type = _type;
     lat = _lat;
     lng = _lng;
 
@@ -69,7 +66,7 @@ TripStop::TripStop(int32_t _id, string _type, float _lat, float _lng)
 void TripStop::write(FILE *fp)
 {
     assert(fwrite(&id, sizeof(int32_t), 1, fp) == 1);
-    assert(fwrite(type, 1, MAX_ID_LEN, fp) == MAX_ID_LEN);
+    assert(fwrite(&type, sizeof(Type), 1, fp) == 1);
     assert(fwrite(&lat, sizeof(float), 1, fp) == 1);
     assert(fwrite(&lng, sizeof(float), 1, fp) == 1);
     

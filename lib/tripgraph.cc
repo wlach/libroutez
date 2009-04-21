@@ -116,7 +116,7 @@ void TripGraph::add_triphop(int32_t start_time, int32_t end_time,
 }
 
 
-void TripGraph::add_tripstop(int32_t id, string type, float lat, float lng)
+void TripGraph::add_tripstop(int32_t id, TripStop::Type type, float lat, float lng)
 {
     // id must equal size of tripstops
     assert(id == tripstops.size());
@@ -183,7 +183,7 @@ void TripGraph::link_osm_gtfs()
     {
         tripstop_count++;
         // For each GTFS stop...
-        if (strcmp((*i)->type, "gtfs") == 0)
+        if ((*i)->type == TripStop::GTFS)
         {
             Point gtfs_pt((*i)->lat, (*i)->lng);
             
@@ -521,7 +521,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
 
 
 vector<TripStop> TripGraph::find_tripstops_in_range(double lat, double lng, 
-                                                    const char *type,
+                                                    TripStop::Type type,
                                                     double range)
 {
     vector<TripStop> tripstops_in_range;
@@ -529,7 +529,7 @@ vector<TripStop> TripGraph::find_tripstops_in_range(double lat, double lng,
     for (TripStopList::iterator i = tripstops.begin(); 
          i != tripstops.end(); i++)
     {
-        if (strcmp((*i)->type, type) != 0)
+        if ((*i)->type != type)
             continue;
 
         double dist = distance((*i)->lat, (*i)->lng, lat, lng);

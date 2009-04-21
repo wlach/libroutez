@@ -37,7 +37,7 @@ def load_gtfs(tripgraph, sched, idmap):
     stops = sched.GetStopList()
     for stop in stops:
         idmap.stopmap[stop.stop_id] = len(idmap.stopmap)
-        tripgraph.add_tripstop(idmap.stopmap[stop.stop_id], "gtfs", 
+        tripgraph.add_tripstop(idmap.stopmap[stop.stop_id], TripStop.GTFS, 
                                stop.stop_lat, stop.stop_lon)
       
     trips = sched.GetTripList()
@@ -72,7 +72,7 @@ def load_osm(tripgraph, map, idmap):
     # much anything
     for node in map.nodes.values():
         idmap.stopmap[node.id] = len(idmap.stopmap)
-        tripgraph.add_tripstop(idmap.stopmap[node.id], "osm", node.lat, 
+        tripgraph.add_tripstop(idmap.stopmap[node.id], TripStop.OSM, node.lat, 
                                node.lon)
         
     for way in map.ways.values():

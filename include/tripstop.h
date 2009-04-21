@@ -49,8 +49,13 @@ struct WalkHop
 
 struct TripStop
 {
+    int32_t id;
+    enum Type { OSM, GTFS };
+    Type type;
+    float lat, lng;
+
     TripStop(FILE *fp);
-    TripStop(int32_t _id, std::string _type, float _lat, float _lng);
+    TripStop(int32_t _id, Type _type, float _lat, float _lng);
     TripStop() {}
 
     void write(FILE *fp);
@@ -63,12 +68,7 @@ struct TripStop
                                             std::string service_period);
     std::vector<TripHop> find_triphops(
         int time, int route_id, std::string service_period, int num);
- 
 
-    int32_t id;
-    char type[MAX_ID_LEN];
-    float lat, lng;
-    
     typedef std::vector<boost::shared_ptr<TripHop> > TripHopList;
     typedef boost::unordered_map<int, TripHopList> TripHopDict;
     typedef boost::unordered_map<std::string, TripHopDict> ServiceDict;

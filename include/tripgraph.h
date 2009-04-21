@@ -21,7 +21,7 @@ class TripGraph
     void add_triphop(int32_t start_time, int32_t end_time, int32_t src_id, 
                      int32_t dest_id, int32_t route_id, int32_t trip_id,
                      std::string service_id);
-    void add_tripstop(int32_t id, std::string type, float lat, float lng);
+    void add_tripstop(int32_t id, TripStop::Type type, float lat, float lng);
     void add_walkhop(int32_t src_id, int32_t dest_id);
 
     void link_osm_gtfs();
@@ -52,7 +52,7 @@ class TripGraph
     typedef std::vector<boost::shared_ptr<TripStop> > TripStopList;
 
     std::vector<TripStop> find_tripstops_in_range(double lat, double lng, 
-                                                  const char * type,
+                                                  TripStop::Type type,
                                                   double range);
 
   private:
