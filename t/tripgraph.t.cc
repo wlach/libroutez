@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(tripstops_in_range)
     // north and northwood (just south of north&agricola)
     g.add_tripstop(2, TripStop::GTFS, 44.6567144f, -63.5919115f);
     // Quinpool and Connaught (a few kms away from north&agricola)
-    g.add_tripstop(2, TripStop::GTFS, 44.6432423f, -63.6045261f);
+    g.add_tripstop(3, TripStop::GTFS, 44.6432423f, -63.6045261f);
 
     {
         vector<TripStop> v = g.find_tripstops_in_range(44.6554236f, 
