@@ -30,7 +30,7 @@ config.mk:
 	  sed -e 's/^ *//' -e 's/$$/:/' >> $*.d
 	@rm -f $*.d.tmp
 
-TRIPGRAPH_OBJECTS=lib/tripgraph.o lib/trippath.o lib/tripstop.o 
+TRIPGRAPH_OBJECTS=lib/tripgraph.o lib/trippath.o lib/tripstop.o lib/serviceperiod.o
 
 # libroutez: the main library
 libroutez.so: $(TRIPGRAPH_OBJECTS)

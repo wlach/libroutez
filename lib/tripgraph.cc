@@ -61,6 +61,18 @@ void TripGraph::load(string fname)
             fname.c_str(), strerror(errno), errno);
         return;
     }
+
+    uint32_t num_service_periods = 0;
+    if (fread(&num_service_periods, sizeof(uint32_t), 1, fp) != 1)
+    {
+        printf("Error: Couldn't read the number of service periods.\n");
+        return;
+    }
+    for (int i=0; i < num_service_periods; i++)
+    {
+        ServicePeriod s(fp);
+        add_service_period(s);
+    }
         
     uint32_t num_tripstops = 0;
     if (fread(&num_tripstops, sizeof(uint32_t), 1, fp) != 1)
@@ -70,8 +82,7 @@ void TripGraph::load(string fname)
     }
         
     tripstops.reserve(num_tripstops);
-    uint32_t i = 0;
-    while (i < num_tripstops)
+    for (int i=0; i < num_tripstops; i++)
     {
         shared_ptr<TripStop> s(new TripStop(fp));
         assert(tripstops.size() == s->id);
@@ -93,6 +104,16 @@ void TripGraph::save(string fname)
         return;
     }
 
+    // write service periods
+    uint32_t num_service_periods = 0;
+    for (ServicePeriodDict::iterator i = sdict.begin(); i != sdict.end(); 
+         i++)
+        num_service_periods++;
+    assert(fwrite(&num_service_periods, sizeof(uint32_t), 1, fp) == 1);
+    for (ServicePeriodDict::iterator i = sdict.begin(); i != sdict.end(); 
+         i++)
+        i->second.write(fp);
+
     // write triphops
     uint32_t num_tripstops = tripstops.size();
     assert(fwrite(&num_tripstops, sizeof(uint32_t), 1, fp) == 1);
@@ -103,6 +124,12 @@ void TripGraph::save(string fname)
     }
 
     fclose(fp);
+}
+
+
+void TripGraph::add_service_period(ServicePeriod &service_period)
+{
+    sdict[service_period.id] = service_period;
 }
 
 
@@ -291,6 +318,26 @@ TripStop TripGraph::get_tripstop(int32_t id)
 {
     shared_ptr<TripStop> ts = _get_tripstop(id);
     return TripStop(*ts);
+}
+
+
+vector<ServicePeriod> TripGraph::get_service_periods_for_time(time_t secs)
+{
+    vector<ServicePeriod> vsp;
+
+    struct tm * t = localtime(&secs);
+    for (ServicePeriodDict::iterator i = sdict.begin(); i != sdict.end(); i++)
+    {
+        if (i->second.start_mday <= t->tm_mday && 
+            i->second.start_mon <= t->tm_mon &&
+            i->second.start_year <= t->tm_year &&
+            i->second.end_mday >= t->tm_mday && 
+            i->second.end_mon >= t->tm_mon &&
+            i->second.end_year >= t->tm_year)
+            vsp.push_back(i->second);
+    }
+
+    return vsp;
 }
 
 

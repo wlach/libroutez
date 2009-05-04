@@ -1,5 +1,7 @@
 #include "tripstop.h"
 #include <algorithm>
+#include "defuns.h"
+
 
 using namespace std;
 using namespace boost;

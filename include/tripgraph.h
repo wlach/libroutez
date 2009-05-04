@@ -7,6 +7,7 @@
 #include <boost/unordered_map.hpp>
 #include <vector>
 
+#include "serviceperiod.h"
 #include "trippath.h"
 #include "tripstop.h"
 
@@ -18,6 +19,7 @@ class TripGraph
     void load(std::string fname);
     void save(std::string fname);
 
+    void add_service_period(ServicePeriod &service_period);
     void add_triphop(int32_t start_time, int32_t end_time, int32_t src_id, 
                      int32_t dest_id, int32_t route_id, int32_t trip_id,
                      std::string service_id);
@@ -31,6 +33,8 @@ class TripGraph
 #ifdef SWIG
     %newobject find_path;
 #endif
+    std::vector<ServicePeriod> get_service_periods_for_time(time_t secs);
+
     TripPath * find_path(int secs, std::string service_period, bool walkonly,
                          double src_lat, double src_lng, 
                          double dest_lat, double dest_lng);
@@ -49,6 +53,7 @@ class TripGraph
     typedef boost::unordered_map<int32_t, boost::unordered_map<int32_t, boost::shared_ptr<TripPath> > > VisitedWalkMap;
     typedef std::priority_queue<boost::shared_ptr<TripPath>, std::vector<boost::shared_ptr<TripPath> >, PathCompare> PathQueue;
     
+    typedef boost::unordered_map<std::string, ServicePeriod> ServicePeriodDict;
     typedef std::vector<boost::shared_ptr<TripStop> > TripStopList;
 
     std::vector<TripStop> find_tripstops_in_range(double lat, double lng, 
@@ -69,6 +74,7 @@ class TripGraph
                      PathQueue &uncompleted_paths, PathQueue &completed_paths);
     
     TripStopList tripstops;
+    ServicePeriodDict sdict;
 };
 
-#endif // __TRIPGRAPH
+#endif // __TRIPGRAPH_H

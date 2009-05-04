@@ -9,7 +9,6 @@
 #include <vector>
 #include <list>
 
-const int MAX_ID_LEN = 20;
 
 // a triphop represents a hop to a specific node on the graph at a 
 // particular time (with a particular duration)

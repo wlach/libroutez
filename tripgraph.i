@@ -1,6 +1,7 @@
 %module tripgraph
 
 %{
+#include "serviceperiod.h"
 #include "tripgraph.h"
 #include "trippath.h"
 #include "tripstop.h"
@@ -14,6 +15,7 @@
 %template(ListId) std::list<int>;
 %template(ListTripHop) std::vector<TripHop>;
 %template(ListTripStop) std::vector<TripStop>;
+%include "serviceperiod.h"
 %include "tripgraph.h"
 %include "trippath.h"
 %include "tripstop.h"

@@ -112,3 +112,110 @@ BOOST_AUTO_TEST_CASE(tripstops_in_range)
     }
 }
 
+
+static time_t get_time_t(int tm_mday, int tm_mon, int tm_year)
+{
+    struct tm t;
+    t.tm_sec = 0;
+    t.tm_min = 0;
+    t.tm_hour = 0;
+    t.tm_mday = tm_mday;
+    t.tm_mon = tm_mon;
+    t.tm_year = tm_year;
+    t.tm_wday = -1;
+    t.tm_yday = -1;
+    t.tm_isdst = -1;
+
+    return mktime(&t);
+}
+
+BOOST_AUTO_TEST_CASE(service_periods)
+{
+    TripGraph g;
+
+    // from the 1st to the 7th (i.e. 1st saturday only)
+    {
+        ServicePeriod s("saturday_2008", 1, 1, 108, 7, 1, 108, false, true, false);
+        g.add_service_period(s);
+    }
+
+    // test something that's within a supported service period
+    // Saturday Midnight Jan 5th 2008
+    {
+        vector<ServicePeriod> vsp = g.get_service_periods_for_time(get_time_t(5, 1, 108));
+        BOOST_CHECK_EQUAL(vsp.size(), 1);
+        BOOST_CHECK_EQUAL(vsp[0].id, string("saturday_2008"));
+    }    
+    // test something outside a supported service period: day
+    // Saturday Midnight Jan 11th 2008
+    {
+        vector<ServicePeriod> vsp = g.get_service_periods_for_time(get_time_t(11, 1, 108));
+        BOOST_CHECK_EQUAL(vsp.size(), 0);
+    }
+    // test something outside a supported service period: month
+    // Saturday Midnight Feb 5th 2008
+    {
+        vector<ServicePeriod> vsp = g.get_service_periods_for_time(get_time_t(5, 2, 108));
+        BOOST_CHECK_EQUAL(vsp.size(), 0);
+    }
+
+    // test something outside a supported service period: year
+    // Saturday Midnight Jan 11th 2009
+    {
+        vector<ServicePeriod> vsp = g.get_service_periods_for_time(get_time_t(5, 1, 109));
+        BOOST_CHECK_EQUAL(vsp.size(), 0);
+    }
+
+    // add another service period (saturdays for month of january)
+    {
+        ServicePeriod s("saturday_jan_2008", 1, 1, 108, 31, 1, 108, false, true, 
+                        false);
+        g.add_service_period(s);
+    }
+
+    // test something that's within _two_ supported service periods
+    // Saturday Midnight Jan 5th 2008
+    {
+        vector<ServicePeriod> vsp = g.get_service_periods_for_time(get_time_t(5, 1, 108));
+        BOOST_CHECK_EQUAL(vsp.size(), 2);
+        BOOST_CHECK(vsp[0].id==string("saturday_2008") || vsp[0].id==string("saturday_jan_2008"));
+        BOOST_CHECK(vsp[1].id==string("saturday_2008") || vsp[1].id==string("saturday_jan_2008"));
+        BOOST_CHECK_NE(vsp[0].id, vsp[1].id);
+    }    
+
+    // save graph, reload, make sure service periods are still there
+}
+
+
+BOOST_AUTO_TEST_CASE(service_periods_save_load)
+{
+    TripGraph g;
+
+    // from the 1st to the 7th (i.e. 1st saturday only)
+    {
+        ServicePeriod s("saturday_2008", 1, 1, 108, 7, 1, 108, false, true, false);
+        g.add_service_period(s);
+    }
+    // add another service period (saturdays for month of january)
+    {
+        ServicePeriod s("saturday_jan_2008", 1, 1, 108, 31, 1, 108, false, true, 
+                        false);
+        g.add_service_period(s);
+    }
+
+
+    char *tmpgraphname = tmpnam(NULL); // security issues in unit tests? bah.
+    unlink(tmpgraphname);
+    g.save(tmpgraphname);
+
+    TripGraph g2;
+    g2.load(tmpgraphname);
+
+    {
+        vector<ServicePeriod> vsp = g2.get_service_periods_for_time(get_time_t(5, 1, 108));
+        BOOST_CHECK_EQUAL(vsp.size(), 2);
+        BOOST_CHECK(vsp[0].id==string("saturday_2008") || vsp[0].id==string("saturday_jan_2008"));
+        BOOST_CHECK(vsp[1].id==string("saturday_2008") || vsp[1].id==string("saturday_jan_2008"));
+        BOOST_CHECK_NE(vsp[0].id, vsp[1].id);
+    }    
+}
