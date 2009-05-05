@@ -89,14 +89,15 @@ if __name__ == '__main__':
             % sys.argv[0]
         exit(1)
 
-    g = TripGraph()
     idmap = IdMap()
-    print "Loading OSM."
+    print "Loading OSM." 
     map = osm.OSM(sys.argv[2])
     print "Loading schedule."
     schedule = transitfeed.Schedule(
         problem_reporter=transitfeed.ProblemReporter())
     schedule.Load(sys.argv[1])
+    print "Creating graph"
+    g = TripGraph()
     print "Inserting gtfs into graph"
     load_gtfs(g, schedule, idmap)
     print "Inserting osm into graph"
