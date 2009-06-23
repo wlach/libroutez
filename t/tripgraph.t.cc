@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE(basic_graph_pathfinding)
     g.add_walkhop(0, 1);
 
     {
-        TripPath *p = g.find_path(0, "caturday", false, 0.0, 0.0, 1.0, 0.0);
+        TripPath *p = g.find_path(0, false, 0.0, 0.0, 1.0, 0.0);
         
         std::list<TripAction> actions = p->get_actions();
         BOOST_CHECK_EQUAL(actions.size(), 1);
@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(basic_graph_pathfinding)
     g.add_triphop(500, 1000, 0, 1, 1, 1, "caturday");
 
     {
-        TripPath *p = g.find_path(0, "caturday", false, 0.0, 0.0, 1.0, 0.0);
+        TripPath *p = g.find_path(0, false, 0.0, 0.0, 1.0, 0.0);
         
         std::list<TripAction> actions = p->get_actions();
         BOOST_CHECK_EQUAL(actions.size(), 1);
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(basic_graph_saveload)
     g2.load(tmpgraphname);
 
     {
-        TripPath *p = g.find_path(0, "caturday", false, 0.0, 0.0, 1.0, 0.0);
+        TripPath *p = g.find_path(0, false, 0.0, 0.0, 1.0, 0.0);
         
         std::list<TripAction> actions = p->get_actions();
         BOOST_CHECK_EQUAL(actions.size(), 1);
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(impossible_path)
     g.add_tripstop(2, TripStop::OSM, 0.0f, 1.0f);
     g.add_walkhop(0, 1);
 
-    TripPath *p = g.find_path(0, "caturday", false, 0.0, 0.0, 0.0, 1.0);
+    TripPath *p = g.find_path(0, false, 0.0, 0.0, 0.0, 1.0);
     BOOST_CHECK(!p);
 }
 
@@ -142,27 +142,27 @@ BOOST_AUTO_TEST_CASE(service_periods)
     // test something that's within a supported service period
     // Saturday Midnight Jan 5th 2008
     {
-        vector<ServicePeriod> vsp = g.get_service_periods_for_time(get_time_t(5, 1, 108));
+        vector<string> vsp = g.get_service_period_ids_for_time(get_time_t(5, 1, 108));
         BOOST_CHECK_EQUAL(vsp.size(), 1);
-        BOOST_CHECK_EQUAL(vsp[0].id, string("saturday_2008"));
+        BOOST_CHECK_EQUAL(vsp[0], string("saturday_2008"));
     }    
     // test something outside a supported service period: day
     // Saturday Midnight Jan 11th 2008
     {
-        vector<ServicePeriod> vsp = g.get_service_periods_for_time(get_time_t(11, 1, 108));
+        vector<string> vsp = g.get_service_period_ids_for_time(get_time_t(11, 1, 108));
         BOOST_CHECK_EQUAL(vsp.size(), 0);
     }
     // test something outside a supported service period: month
     // Saturday Midnight Feb 5th 2008
     {
-        vector<ServicePeriod> vsp = g.get_service_periods_for_time(get_time_t(5, 2, 108));
+        vector<string> vsp = g.get_service_period_ids_for_time(get_time_t(5, 2, 108));
         BOOST_CHECK_EQUAL(vsp.size(), 0);
     }
 
     // test something outside a supported service period: year
     // Saturday Midnight Jan 11th 2009
     {
-        vector<ServicePeriod> vsp = g.get_service_periods_for_time(get_time_t(5, 1, 109));
+        vector<string> vsp = g.get_service_period_ids_for_time(get_time_t(5, 1, 109));
         BOOST_CHECK_EQUAL(vsp.size(), 0);
     }
 
@@ -176,11 +176,11 @@ BOOST_AUTO_TEST_CASE(service_periods)
     // test something that's within _two_ supported service periods
     // Saturday Midnight Jan 5th 2008
     {
-        vector<ServicePeriod> vsp = g.get_service_periods_for_time(get_time_t(5, 1, 108));
+        vector<string> vsp = g.get_service_period_ids_for_time(get_time_t(5, 1, 108));
         BOOST_CHECK_EQUAL(vsp.size(), 2);
-        BOOST_CHECK(vsp[0].id==string("saturday_2008") || vsp[0].id==string("saturday_jan_2008"));
-        BOOST_CHECK(vsp[1].id==string("saturday_2008") || vsp[1].id==string("saturday_jan_2008"));
-        BOOST_CHECK_NE(vsp[0].id, vsp[1].id);
+        BOOST_CHECK(vsp[0]==string("saturday_2008") || vsp[0]==string("saturday_jan_2008"));
+        BOOST_CHECK(vsp[1]==string("saturday_2008") || vsp[1]==string("saturday_jan_2008"));
+        BOOST_CHECK_NE(vsp[0], vsp[1]);
     }    
 
     // save graph, reload, make sure service periods are still there
@@ -212,10 +212,10 @@ BOOST_AUTO_TEST_CASE(service_periods_save_load)
     g2.load(tmpgraphname);
 
     {
-        vector<ServicePeriod> vsp = g2.get_service_periods_for_time(get_time_t(5, 1, 108));
+        vector<string> vsp = g2.get_service_period_ids_for_time(get_time_t(5, 1, 108));
         BOOST_CHECK_EQUAL(vsp.size(), 2);
-        BOOST_CHECK(vsp[0].id==string("saturday_2008") || vsp[0].id==string("saturday_jan_2008"));
-        BOOST_CHECK(vsp[1].id==string("saturday_2008") || vsp[1].id==string("saturday_jan_2008"));
-        BOOST_CHECK_NE(vsp[0].id, vsp[1].id);
+        BOOST_CHECK(vsp[0]==string("saturday_2008") || vsp[0]==string("saturday_jan_2008"));
+        BOOST_CHECK(vsp[1]==string("saturday_2008") || vsp[1]==string("saturday_jan_2008"));
+        BOOST_CHECK_NE(vsp[0], vsp[1]);
     }    
 }

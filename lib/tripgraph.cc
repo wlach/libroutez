@@ -321,9 +321,9 @@ TripStop TripGraph::get_tripstop(int32_t id)
 }
 
 
-vector<ServicePeriod> TripGraph::get_service_periods_for_time(time_t secs)
+vector<string> TripGraph::get_service_period_ids_for_time(time_t secs)
 {
-    vector<ServicePeriod> vsp;
+    vector<string> vsp;
 
     struct tm * t = localtime(&secs);
     for (ServicePeriodDict::iterator i = sdict.begin(); i != sdict.end(); i++)
@@ -334,16 +334,16 @@ vector<ServicePeriod> TripGraph::get_service_periods_for_time(time_t secs)
             i->second.end_mday >= t->tm_mday && 
             i->second.end_mon >= t->tm_mon &&
             i->second.end_year >= t->tm_year)
-            vsp.push_back(i->second);
+            vsp.push_back(i->first);
     }
 
     return vsp;
 }
 
 
-TripPath * TripGraph::find_path(int secs, string service_period, bool walkonly,
-                              double src_lat, double src_lng, 
-                              double dest_lat, double dest_lng)
+TripPath * TripGraph::find_path(time_t start, bool walkonly,
+                                double src_lat, double src_lng, 
+                                double dest_lat, double dest_lng)
 {
     PathQueue uncompleted_paths;
     PathQueue completed_paths;
@@ -353,20 +353,27 @@ TripPath * TripGraph::find_path(int secs, string service_period, bool walkonly,
 
     shared_ptr<TripStop> start_node = get_nearest_stop(src_lat, src_lng);
     shared_ptr<TripStop> end_node = get_nearest_stop(dest_lat, dest_lng);
-    DEBUGPATH("Find path. Secs: %d service period: %s walkonly: %d "
+    DEBUGPATH("Find path. Secs: %d walkonly: %d "
               "src lat: %f src lng: %f dest_lat: %f dest_lng: %f\n",
-              secs, service_period.c_str(), walkonly, src_lat, src_lng,
+              start, walkonly, src_lat, src_lng,
               dest_lat, dest_lng);
     DEBUGPATH("- Start: %d End: %d\n", start_node->id, end_node->id);
+
+    //DEBUGPATH("..service period determination..");
 
     // Consider the distance required to reach the start node from the 
     // beginning, and add that to our start time.
     double dist_from_start = distance(src_lat, src_lng, 
                                       start_node->lat, start_node->lng);
-    secs += (int)(dist_from_start / est_walk_speed);
+    start += (dist_from_start / est_walk_speed);
+
+    // Figure out service period based on start time, then figure out
+    // seconds since midnight on our particular day
+    vector<string> vsp = get_service_period_ids_for_time(start);
+
     
-    DEBUGPATH("- Start time - %d\n", secs);
-    shared_ptr<TripPath> start_path(new TripPath(secs, est_walk_speed, 
+    DEBUGPATH("- Start time - %d\n", start);
+    shared_ptr<TripPath> start_path(new TripPath(start, est_walk_speed, 
                                                  end_node, start_node));
     if (start_node == end_node)
         return new TripPath(*start_path);
@@ -382,7 +389,7 @@ TripPath * TripGraph::find_path(int secs, string service_period, bool walkonly,
         DEBUGPATH("Continuing\n");
         shared_ptr<TripPath> path = uncompleted_paths.top();
         uncompleted_paths.pop();
-        extend_path(path, service_period, walkonly, end_node->id, 
+        extend_path(path, vsp, walkonly, end_node->id, 
                     num_paths_considered, visited_routes, visited_walks, 
                     uncompleted_paths, completed_paths);
         
@@ -419,7 +426,7 @@ shared_ptr<TripStop> TripGraph::_get_tripstop(int32_t id)
 
 
 void TripGraph::extend_path(shared_ptr<TripPath> &path, 
-                            string &service_period, 
+                            vector<string> &service_period_ids, 
                             bool walkonly,
                             int32_t goal_id,
                             int &num_paths_considered,
@@ -452,11 +459,17 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
 
     // Keep track of outgoing route ids at this node: make sure that we 
     // don't get on a route later when we could have gotten on here.
-    list<int> outgoing_route_ids = src_stop->get_routes(service_period);
+    list<int> outgoing_route_ids;
+    for (vector<string>::iterator i = service_period_ids.begin(); i != service_period_ids.end(); i++)
+    {
+        list<int> route_ids = src_stop->get_routes(*i);
+        for (list<int>::iterator j = route_ids.begin(); j != route_ids.end(); j++) 
+            outgoing_route_ids.push_back(*j);
+    }
 
     // Explore walkhops that are better than the ones we've already visited.
     // If we're on a bus, don't allow a transfer if we've been on for
-    // less than 5 minutes (FIXME: probably better to measure distance 
+    // less than 5 minutes (FIXME: probably better to measure distance
     // travelled?)
     if (last_route_id == -1 || path->route_time > (2 * 60))
     {
@@ -507,59 +520,64 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
         return;
 
     // Find outgoing triphops from the source and get a list of paths to them. 
-    for (list<int>::iterator i = outgoing_route_ids.begin();
-         i != outgoing_route_ids.end(); i++)
+    for (vector<string>::iterator i = service_period_ids.begin(); 
+         i != service_period_ids.end(); i++)
     {
-        int LEEWAY = 0;
-        if ((*i) != last_route_id)
-            LEEWAY = (5*60); // give 5 mins to make a transfer
+        list<int> route_ids = src_stop->get_routes(*i);
 
-        shared_ptr<TripHop> t = src_stop->find_triphop((int)path->time + LEEWAY, 
-                                                       (*i), 
-                                                       service_period);
-        if (t)
+        for (list<int>::iterator j = route_ids.begin(); j != outgoing_route_ids.end(); j++)
         {
-            // If we've been on the route before (or could have been), 
-            // don't get on again.
-            if ((*i) != last_route_id && path->possible_route_ids.count(*i))
-            {
-                // pass
-            }
-            // Disallow more than three transfers.
-            else if ((*i) != last_route_id && 
-                     path->traversed_route_ids > 3)
-            {
-                // pass
-            }
-            else
-            {
-                // Do a quick test to make sure that the potential basis for a 
-                // new path isn't worse than what we have already, before
-                // incurring the cost of creating a new path and evaluating it.
-                unordered_map<int, shared_ptr<TripPath> >::iterator v = visited_routes[src_id].find(*i);
-                if (v != visited_routes[src_id].end() && path->heuristic_weight > v->second->heuristic_weight)
-                    continue;
+            int LEEWAY = 0;
+            if ((*j) != last_route_id)
+                LEEWAY = (5*60); // give 5 mins to make a transfer
 
-                shared_ptr<TripAction> action = shared_ptr<TripAction>(
-                    new TripAction(src_id, t->dest_id, (*i), t->start_time,
-                                   t->end_time));
-                shared_ptr<TripStop> ds = _get_tripstop(t->dest_id);
-                shared_ptr<TripPath> path2 = path->add_action(
-                    action, outgoing_route_ids, ds);
+            shared_ptr<TripHop> t = src_stop->find_triphop((int)path->time + LEEWAY, 
+                                                           (*j), 
+                                                           (*i));
+            if (t)
+            {
+                // If we've been on the route before (or could have been), 
+                // don't get on again.
+                if ((*j) != last_route_id && path->possible_route_ids.count(*j))
+                {
+                    // pass
+                }
+                // Disallow more than three transfers.
+                else if ((*j) != last_route_id && 
+                         path->traversed_route_ids > 3)
+                {
+                    // pass
+                }
+                else
+                {
+                    // Do a quick test to make sure that the potential basis for a 
+                    // new path isn't worse than what we have already, before
+                    // incurring the cost of creating a new path and evaluating it.
+                    unordered_map<int, shared_ptr<TripPath> >::iterator v = visited_routes[src_id].find(*j);
+                    if (v != visited_routes[src_id].end() && path->heuristic_weight > v->second->heuristic_weight)
+                        continue;
+
+                    shared_ptr<TripAction> action = shared_ptr<TripAction>(
+                        new TripAction(src_id, t->dest_id, (*j), t->start_time,
+                                       t->end_time));
+                    shared_ptr<TripStop> ds = _get_tripstop(t->dest_id);
+                    shared_ptr<TripPath> path2 = path->add_action(
+                        action, outgoing_route_ids, ds);
                 
 
-                if (v == visited_routes[src_id].end() || 
-                    v->second->heuristic_weight > path2->heuristic_weight ||
-                    ((v->second->heuristic_weight - path2->heuristic_weight) < 1.0f &&
-                     v->second->walking_time > path2->walking_time))
-                {
-                    if (t->dest_id == goal_id)
-                        completed_paths.push(path2);
-                    else
-                        uncompleted_paths.push(path2);
+                    if (v == visited_routes[src_id].end() || 
+                        v->second->heuristic_weight > path2->heuristic_weight ||
+                        ((v->second->heuristic_weight - path2->heuristic_weight) < 1.0f &&
+                         v->second->walking_time > path2->walking_time))
+                    {
+                        if (t->dest_id == goal_id)
+                            completed_paths.push(path2);
+                        else
+                            uncompleted_paths.push(path2);
 
-                    num_paths_considered++;
-                    visited_routes[src_id][(*i)] = path2;
+                        num_paths_considered++;
+                        visited_routes[src_id][(*j)] = path2;
+                    }
                 }
             }
         }

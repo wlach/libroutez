@@ -34,6 +34,22 @@ class IdMap:
         f.close()
 
 def load_gtfs(tripgraph, sched, idmap):
+    sp_ids = sched.service_periods.keys()
+    for sp_id in sp_ids:
+        sp = sched.service_periods[service_period_id]
+        if not sp.start_date or not sp.end_date:
+            continue
+        tm_start = time.strptime(sp.start_date, "%Y%m%d")
+        tm_end = time.strptime(sp.end_date, "%Y%m%d")
+        # FIXME: currently assume weekday service is uniform, i.e. 
+        # monday service == mon-fri service
+        s = ServicePeriod(sp_id, 
+                          tm_start.tm_mday, tm_start.tm_mon, tm_start.tm_year,
+                          tm_start.tm_mday, tm_start.tm_mon, tm_start.tm_year,
+                          sp.day_of_week[0], sp.day_of_week[5], 
+                          sp.day_of_week[6])
+        tripgraph.add_service_period(s)
+
     stops = sched.GetStopList()
     for stop in stops:
         idmap.stopmap[stop.stop_id] = len(idmap.stopmap)
