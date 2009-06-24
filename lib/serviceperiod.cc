@@ -75,8 +75,8 @@ ServicePeriod::ServicePeriod(FILE *fp)
 void ServicePeriod::write(FILE *fp)
 {
     char spstr[MAX_ID_LEN];
-    strcpy(spstr, id.c_str());
-    assert(fwrite(&spstr, 1, MAX_ID_LEN, fp) == MAX_ID_LEN);
+    strncpy(spstr, id.c_str(), MAX_ID_LEN);
+    assert(fwrite(spstr, sizeof(char), MAX_ID_LEN, fp) == MAX_ID_LEN);
 
     assert(fwrite(&start_mday, sizeof(int32_t), 1, fp) == 1);
     assert(fwrite(&start_mon, sizeof(int32_t), 1, fp) == 1);
