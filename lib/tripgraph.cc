@@ -82,12 +82,11 @@ void TripGraph::load(string fname)
     }
         
     tripstops.reserve(num_tripstops);
-    for (int i=0; i < num_tripstops; i++)
+    for (uint32_t i=0; i < num_tripstops; i++)
     {
         shared_ptr<TripStop> s(new TripStop(fp));
         assert(tripstops.size() == s->id);
         tripstops.push_back(s);
-        i++;
     }
 
     fclose(fp);
@@ -114,7 +113,7 @@ void TripGraph::save(string fname)
          i++)
         i->second.write(fp);
 
-    // write triphops
+    // write tripstops
     uint32_t num_tripstops = tripstops.size();
     assert(fwrite(&num_tripstops, sizeof(uint32_t), 1, fp) == 1);
     for (TripStopList::iterator i = tripstops.begin();
