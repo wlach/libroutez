@@ -9,7 +9,7 @@ struct ServicePeriod
     ServicePeriod(std::string id, 
                   int32_t start_mday, int32_t start_mon, int32_t start_year, 
                   int32_t end_mday, int32_t end_mon, int32_t end_year, 
-                  bool weekday, bool saturday, bool sunday);
+                  int32_t duration, bool weekday, bool saturday, bool sunday);
     ServicePeriod(const ServicePeriod &s);
     ServicePeriod();
     ServicePeriod(FILE *fp);
@@ -23,6 +23,7 @@ struct ServicePeriod
     int32_t end_mday;
     int32_t end_mon;
     int32_t end_year; 
+    int32_t duration;
     bool weekday; 
     bool saturday;
     bool sunday;
