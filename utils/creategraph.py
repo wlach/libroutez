@@ -101,17 +101,19 @@ def load_osm(tripgraph, map, idmap):
     # starting from the last gtfs id. I'm assuming that OSM ids can be pretty 
     # much anything
     for node in map.nodes.values():
-        idmap.stopmap[node.id] = len(idmap.stopmap)
-        tripgraph.add_tripstop(idmap.stopmap[node.id], TripStop.OSM, node.lat, 
-                               node.lon)
+        osmid = "osm" + node.id
+        idmap.stopmap[osmid] = len(idmap.stopmap)
+        tripgraph.add_tripstop(idmap.stopmap[osmid], TripStop.OSM,
+                               node.lat, node.lon)
         
     for way in map.ways.values():
-        prev_id = None
+        previd = None
         for id in way.nds:
-            if prev_id:
-                tripgraph.add_walkhop(idmap.stopmap[prev_id], idmap.stopmap[id])
-                tripgraph.add_walkhop(idmap.stopmap[id], idmap.stopmap[prev_id])
-            prev_id = id
+            osmid = "osm" + id
+            if previd:
+                tripgraph.add_walkhop(idmap.stopmap[previd], idmap.stopmap[osmid])
+                tripgraph.add_walkhop(idmap.stopmap[osmid], idmap.stopmap[previd])
+            previd = osmid
 
 if __name__ == '__main__':
     if len(sys.argv) < 5:

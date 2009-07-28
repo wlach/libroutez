@@ -59,6 +59,14 @@ BOOST_AUTO_TEST_CASE(basic_graph_saveload)
     TripGraph g2;
     g2.load(tmpgraphname);
 
+    // verify that we have two tripstops
+    for (int i=0; i<2; i++) 
+    {
+        TripStop ts = g2.get_tripstop(1);
+        BOOST_CHECK_EQUAL(ts.type, TripStop::OSM);
+    }
+
+    // verify that we can still solve a basic path
     {
         TripPath *p = g.find_path(0, false, 0.0, 0.0, 1.0, 0.0);
         

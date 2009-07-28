@@ -82,12 +82,11 @@ void TripGraph::load(string fname)
     }
         
     tripstops.reserve(num_tripstops);
-    for (int i=0; i < num_tripstops; i++)
+    for (uint32_t i=0; i < num_tripstops; i++)
     {
         shared_ptr<TripStop> s(new TripStop(fp));
         assert(tripstops.size() == s->id);
         tripstops.push_back(s);
-        i++;
     }
 
     fclose(fp);
@@ -114,7 +113,7 @@ void TripGraph::save(string fname)
          i++)
         i->second.write(fp);
 
-    // write triphops
+    // write tripstops
     uint32_t num_tripstops = tripstops.size();
     assert(fwrite(&num_tripstops, sizeof(uint32_t), 1, fp) == 1);
     for (TripStopList::iterator i = tripstops.begin();
@@ -203,12 +202,20 @@ void TripGraph::link_osm_gtfs()
 {
     map<int32_t, pair<int32_t, int32_t> > new_walkhops;
 
-    int tripstop_count = 0;
-    int tripstop_total = tripstops.size();
+    // do some counting of the actual number of gtfs
+    int gtfs_tripstop_count = 0;
+    int gtfs_tripstop_total = 0;
     for (TripStopList::iterator i = tripstops.begin(); 
          i != tripstops.end(); i++)
     {
-        tripstop_count++;
+        if ((*i)->type == TripStop::GTFS)
+            gtfs_tripstop_total++;
+    }
+
+    for (TripStopList::iterator i = tripstops.begin(); 
+         i != tripstops.end(); i++)
+    {
+        gtfs_tripstop_count++;
         // For each GTFS stop...
         if ((*i)->type == TripStop::GTFS)
         {
@@ -265,7 +272,7 @@ void TripGraph::link_osm_gtfs()
             
             new_walkhops[(*i)->id] = nearest_walkhop;
             printf("%02.2f%% done: Linking %d -> %d, %d\n", 
-                    ((float)tripstop_count * 100.0f) / ((float)tripstop_total),
+                    ((float)gtfs_tripstop_count * 100.0f) / ((float)gtfs_tripstop_total),
                     (*i)->id, 
                     nearest_walkhop.first, 
                     nearest_walkhop.second);

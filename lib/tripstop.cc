@@ -89,14 +89,14 @@ void TripStop::write(FILE *fp)
         for (ServiceDict::iterator i = tdict->begin(); i != tdict->end(); i++)
         {
             char service_period[MAX_ID_LEN];
-            strcpy(service_period, i->first.c_str());
+            strncpy(service_period, i->first.c_str(), MAX_ID_LEN);
             for (TripHopDict::iterator j = i->second.begin(); j != i->second.end(); j++)
             {
                 int32_t route_id = j->first;
                 for (TripHopList::iterator k = j->second.begin(); k != j->second.end(); k++)                
                 {
                     shared_ptr<TripHop> t = (*k);
-                    assert(fwrite(&service_period, 1, MAX_ID_LEN, fp) == MAX_ID_LEN);
+                    assert(fwrite(service_period, sizeof(char), MAX_ID_LEN, fp) == MAX_ID_LEN);
                     assert(fwrite(&route_id, sizeof(int32_t), 1, fp) == 1);
                     assert(fwrite(k->get(), sizeof(TripHop), 1, fp) == 1);
                 }
