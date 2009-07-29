@@ -41,7 +41,8 @@ MacOS X).
 1. Download and install the following packages:
  - Boost
   - Probably any recent version should do. We need shared_ptr, unordered_set,
-  and unordered_map.
+  and unordered_map (unordered_map.hpp is included in debian/ubuntu packages 
+  libboost1.37-dev & libboost1.38-dev)
  - Google Transit Data Feed (http://code.google.com/p/googletransitdatafeed/)
    - As of this writing you need what's in SVN, as it has a fix that I made
    to actually handle interpolated stops correctly. The next version after
