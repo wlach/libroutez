@@ -202,7 +202,7 @@ shared_ptr<TripPath> TripPath::add_action(shared_ptr<TripAction> &action,
 
     new_trippath->route_time += (action->end_time - action->start_time);
     new_trippath->weight += (action->end_time - action->start_time);
-    new_trippath->weight += (action->start_time - new_trippath->time);
+    new_trippath->weight += (action->start_time - time);
 
     if (new_trippath->last_action)
         action->parent = new_trippath->last_action;

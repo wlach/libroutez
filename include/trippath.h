@@ -17,7 +17,7 @@ struct TripAction
     TripAction &operator=(const TripAction &other);
 
     int32_t src_id, dest_id;
-    float start_time, end_time;
+    double start_time, end_time;
     int route_id;
 
     // pointer to the action which preceded this one

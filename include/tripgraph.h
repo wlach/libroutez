@@ -30,12 +30,12 @@ class TripGraph
 
     TripStop get_tripstop(int32_t id);
 
-    std::vector<std::pair<std::string, int> > get_service_period_ids_for_time(time_t secs);
+    std::vector<std::pair<std::string, int> > get_service_period_ids_for_time(int secs);
 
 #ifdef SWIG
     %newobject find_path;
 #endif
-    TripPath * find_path(time_t start, bool walkonly,
+    TripPath * find_path(double start, bool walkonly,
                          double src_lat, double src_lng, 
                          double dest_lat, double dest_lng);
     // various internal types

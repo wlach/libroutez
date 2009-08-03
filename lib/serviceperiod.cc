@@ -74,6 +74,7 @@ ServicePeriod::ServicePeriod(FILE *fp)
 
     assert(fread(&start_time, sizeof(time_t), 1, fp) == 1);
     assert(fread(&end_time, sizeof(time_t), 1, fp) == 1);
+
     assert(fread(&duration, sizeof(int32_t), 1, fp) == 1);
     assert(fread(&weekday, sizeof(bool), 1, fp) == 1);
     assert(fread(&saturday, sizeof(bool), 1, fp) == 1);

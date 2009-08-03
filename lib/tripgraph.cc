@@ -329,7 +329,7 @@ TripStop TripGraph::get_tripstop(int32_t id)
 }
 
 
-vector<pair<string, int> > TripGraph::get_service_period_ids_for_time(time_t secs)
+vector<pair<string, int> > TripGraph::get_service_period_ids_for_time(int secs)
 {
     vector<pair<string, int> > vsp;
 
@@ -352,7 +352,7 @@ vector<pair<string, int> > TripGraph::get_service_period_ids_for_time(time_t sec
 }
 
 
-TripPath * TripGraph::find_path(time_t start, bool walkonly,
+TripPath * TripGraph::find_path(double start, bool walkonly,
                                 double src_lat, double src_lng, 
                                 double dest_lat, double dest_lng)
 {
@@ -364,7 +364,7 @@ TripPath * TripGraph::find_path(time_t start, bool walkonly,
 
     shared_ptr<TripStop> start_node = get_nearest_stop(src_lat, src_lng);
     shared_ptr<TripStop> end_node = get_nearest_stop(dest_lat, dest_lng);
-    DEBUGPATH("Find path. Secs: %d walkonly: %d "
+    DEBUGPATH("Find path. Secs: %f walkonly: %d "
               "src lat: %f src lng: %f dest_lat: %f dest_lng: %f\n",
               start, walkonly, src_lat, src_lng, dest_lat, dest_lng);
     DEBUGPATH("- Start: %d End: %d\n", start_node->id, end_node->id);
@@ -455,11 +455,9 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
                                last_route_id);
     }
 #endif
+    double elapsed_daysecs = (uint64_t)path->time % SECS_IN_DAY;
+    double daystart = path->time - elapsed_daysecs;
 
-    // get day secs-- position of this time relative to midnight (needed to 
-    // determine possible triphops)
-    int elapsed_daysecs = ((int)path->time) % SECS_IN_DAY;
-    
     // Figure out service period based on start time, then figure out
     // seconds since midnight on our particular day
     vector<pair<string,int> > vsp = get_service_period_ids_for_time(path->time);
@@ -542,7 +540,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
             if ((*j) != last_route_id)
                 LEEWAY = (5*60); // give 5 mins to make a transfer
 
-            shared_ptr<TripHop> t = src_stop->find_triphop((int)elapsed_daysecs + sp->second + LEEWAY, 
+            shared_ptr<TripHop> t = src_stop->find_triphop(elapsed_daysecs + sp->second + LEEWAY, 
                                                            (*j), sp->first);
             if (t)
             {
@@ -568,8 +566,8 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
                         continue;
 
                     shared_ptr<TripAction> action = shared_ptr<TripAction>(
-                        new TripAction(src_id, t->dest_id, (*j), t->start_time,
-                                       t->end_time));
+                        new TripAction(src_id, t->dest_id, (*j), daystart + t->start_time,
+                                       daystart + t->end_time));
                     shared_ptr<TripStop> ds = _get_tripstop(t->dest_id);
                     shared_ptr<TripPath> path2 = path->add_action(
                         action, outgoing_route_ids, ds);
