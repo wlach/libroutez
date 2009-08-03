@@ -4,6 +4,22 @@
 #include "defuns.h"
 
 
+static time_t get_time_t(int tm_mday, int tm_mon, int tm_year)
+{
+    struct tm t;
+    t.tm_sec = 0;
+    t.tm_min = 0;
+    t.tm_hour = 0;
+    t.tm_mday = tm_mday;
+    t.tm_mon = tm_mon;
+    t.tm_year = tm_year;
+    t.tm_wday = -1;
+    t.tm_yday = -1;
+    t.tm_isdst = -1;
+
+    return mktime(&t);
+}
+
 ServicePeriod::ServicePeriod(std::string _id, int32_t _start_mday, 
                              int32_t _start_mon, int32_t _start_year, 
                              int32_t _end_mday, int32_t _end_mon, 
@@ -12,12 +28,10 @@ ServicePeriod::ServicePeriod(std::string _id, int32_t _start_mday,
                              bool _sunday)
 {
     id = _id;
-    start_mday = _start_mday;
-    start_mon = _start_mon;
-    start_year = _start_year;
-    end_mday = _end_mday;
-    end_mon = _end_mon;
-    end_year = _end_year; 
+
+    start_time = get_time_t(_start_mday, _start_mon, _start_year);
+    end_time = get_time_t(_end_mday, _end_mon, _end_year);
+
     duration = _duration;
     weekday = _weekday; 
     saturday = _saturday;
@@ -28,12 +42,10 @@ ServicePeriod::ServicePeriod(std::string _id, int32_t _start_mday,
 ServicePeriod::ServicePeriod(const ServicePeriod &s) 
 {
     id = s.id;
-    start_mday = s.start_mday;
-    start_mon = s.start_mon;
-    start_year = s.start_year;
-    end_mday = s.end_mday;
-    end_mon = s.end_mon;
-    end_year = s.end_year; 
+
+    start_time = s.start_time;
+    end_time = s.end_time; 
+
     duration = s.duration;
     weekday = s.weekday; 
     saturday = s.saturday;
@@ -44,12 +56,9 @@ ServicePeriod::ServicePeriod(const ServicePeriod &s)
 ServicePeriod::ServicePeriod()
 {
     // blank service period object
-    start_mday = 0;
-    start_mon = 0;
-    start_year = 0;
-    end_mday = 0;
-    end_mon = 0;
-    end_year = 0;
+    start_time = 0;
+    end_time = 0;
+
     duration = 0;
     weekday = false; 
     saturday = false;
@@ -63,12 +72,8 @@ ServicePeriod::ServicePeriod(FILE *fp)
     assert(fread(_id, 1, MAX_ID_LEN, fp) == MAX_ID_LEN);
     id = _id;
 
-    assert(fread(&start_mday, sizeof(int32_t), 1, fp) == 1);
-    assert(fread(&start_mon, sizeof(int32_t), 1, fp) == 1);
-    assert(fread(&start_year, sizeof(int32_t), 1, fp) == 1);
-    assert(fread(&end_mday, sizeof(int32_t), 1, fp) == 1);
-    assert(fread(&end_mon, sizeof(int32_t), 1, fp) == 1);
-    assert(fread(&end_year, sizeof(int32_t), 1, fp) == 1);
+    assert(fread(&start_time, sizeof(time_t), 1, fp) == 1);
+    assert(fread(&end_time, sizeof(time_t), 1, fp) == 1);
     assert(fread(&duration, sizeof(int32_t), 1, fp) == 1);
     assert(fread(&weekday, sizeof(bool), 1, fp) == 1);
     assert(fread(&saturday, sizeof(bool), 1, fp) == 1);
@@ -82,12 +87,9 @@ void ServicePeriod::write(FILE *fp)
     strncpy(spstr, id.c_str(), MAX_ID_LEN);
     assert(fwrite(spstr, sizeof(char), MAX_ID_LEN, fp) == MAX_ID_LEN);
 
-    assert(fwrite(&start_mday, sizeof(int32_t), 1, fp) == 1);
-    assert(fwrite(&start_mon, sizeof(int32_t), 1, fp) == 1);
-    assert(fwrite(&start_year, sizeof(int32_t), 1, fp) == 1);
-    assert(fwrite(&end_mday, sizeof(int32_t), 1, fp) == 1);
-    assert(fwrite(&end_mon, sizeof(int32_t), 1, fp) == 1);
-    assert(fwrite(&end_year, sizeof(int32_t), 1, fp) == 1);
+    assert(fwrite(&start_time, sizeof(time_t), 1, fp) == 1);
+    assert(fwrite(&end_time, sizeof(time_t), 1, fp) == 1);
+
     assert(fwrite(&duration, sizeof(int32_t), 1, fp) == 1);
     assert(fwrite(&weekday, sizeof(bool), 1, fp) == 1);
     assert(fwrite(&saturday, sizeof(bool), 1, fp) == 1);

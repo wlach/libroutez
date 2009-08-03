@@ -17,12 +17,13 @@ struct ServicePeriod
     void write(FILE *fp);
 
     std::string id;
-    int32_t start_mday;
-    int32_t start_mon;
-    int32_t start_year;
-    int32_t end_mday;
-    int32_t end_mon;
-    int32_t end_year; 
+
+    // start/end time: the range of dates for which the service period is 
+    // valid (e.g. Jan 2008 - Sep 2009)
+    time_t start_time;
+    time_t end_time;
+
+    // duration and days of the week that the service period is active
     int32_t duration;
     bool weekday; 
     bool saturday;

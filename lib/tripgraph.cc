@@ -16,6 +16,8 @@ using namespace boost;
 
 // Estimated walking speed in m/s
 static const float est_walk_speed = 1.1f;
+static int SECS_IN_DAY = (60*60*24);
+
 
 static inline double radians(double degrees)
 {
@@ -328,20 +330,23 @@ TripStop TripGraph::get_tripstop(int32_t id)
 }
 
 
-vector<string> TripGraph::get_service_period_ids_for_time(time_t secs)
+vector<pair<string, int> > TripGraph::get_service_period_ids_for_time(time_t secs)
 {
-    vector<string> vsp;
+    vector<pair<string, int> > vsp;
 
-    struct tm * t = localtime(&secs);
     for (ServicePeriodDict::iterator i = sdict.begin(); i != sdict.end(); i++)
     {
-        if (i->second.start_mday <= t->tm_mday && 
-            i->second.start_mon <= t->tm_mon &&
-            i->second.start_year <= t->tm_year &&
-            i->second.end_mday >= t->tm_mday && 
-            i->second.end_mon >= t->tm_mon &&
-            i->second.end_year >= t->tm_year)
-            vsp.push_back(i->first);
+        for (int offset = 0; offset < i->second.duration; offset += SECS_IN_DAY)
+        {
+            time_t mysecs = secs - offset;
+            struct tm * t = localtime(&mysecs);
+            if (i->second.start_time <= mysecs && i->second.end_time >= mysecs && 
+                ((t->tm_wday == 6 && i->second.saturday) || (t->tm_wday == 0 && i->second.sunday) ||
+                 (t->tm_wday > 0 && t->tm_wday < 6 && i->second.weekday)))
+            {
+                vsp.push_back(pair<string, int>(i->first, offset));
+            } 
+        }
     }
 
     return vsp;
@@ -362,8 +367,7 @@ TripPath * TripGraph::find_path(time_t start, bool walkonly,
     shared_ptr<TripStop> end_node = get_nearest_stop(dest_lat, dest_lng);
     DEBUGPATH("Find path. Secs: %d walkonly: %d "
               "src lat: %f src lng: %f dest_lat: %f dest_lng: %f\n",
-              start, walkonly, src_lat, src_lng,
-              dest_lat, dest_lng);
+              start, walkonly, src_lat, src_lng, dest_lat, dest_lng);
     DEBUGPATH("- Start: %d End: %d\n", start_node->id, end_node->id);
 
     //DEBUGPATH("..service period determination..");
@@ -374,11 +378,6 @@ TripPath * TripGraph::find_path(time_t start, bool walkonly,
                                       start_node->lat, start_node->lng);
     start += (dist_from_start / est_walk_speed);
 
-    // Figure out service period based on start time, then figure out
-    // seconds since midnight on our particular day
-    vector<string> vsp = get_service_period_ids_for_time(start);
-
-    
     DEBUGPATH("- Start time - %d\n", start);
     shared_ptr<TripPath> start_path(new TripPath(start, est_walk_speed, 
                                                  end_node, start_node));
@@ -396,9 +395,9 @@ TripPath * TripGraph::find_path(time_t start, bool walkonly,
         DEBUGPATH("Continuing\n");
         shared_ptr<TripPath> path = uncompleted_paths.top();
         uncompleted_paths.pop();
-        extend_path(path, vsp, walkonly, end_node->id, 
-                    num_paths_considered, visited_routes, visited_walks, 
-                    uncompleted_paths, completed_paths);
+        extend_path(path, walkonly, end_node->id, num_paths_considered, 
+                    visited_routes, visited_walks, uncompleted_paths, 
+                    completed_paths);
         
         // If we've still got open paths, but their weight exceeds that
         // of the weight of a completed path, break.
@@ -432,13 +431,12 @@ shared_ptr<TripStop> TripGraph::_get_tripstop(int32_t id)
 }
 
 
-void TripGraph::extend_path(shared_ptr<TripPath> &path, 
-                            vector<string> &service_period_ids, 
+void TripGraph::extend_path(shared_ptr<TripPath> &path,
                             bool walkonly,
                             int32_t goal_id,
                             int &num_paths_considered,
                             VisitedRouteMap &visited_routes,
-                            VisitedWalkMap &visited_walks, 
+                            VisitedWalkMap &visited_walks,
                             PathQueue &uncompleted_paths,
                             PathQueue &completed_paths)
 {
@@ -458,18 +456,26 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
                                last_route_id);
     }
 #endif
+
+    // get day secs-- position of this time relative to midnight (needed to 
+    // determine possible triphops)
+    int elapsed_daysecs = ((int)path->time) % SECS_IN_DAY;
     
+    // Figure out service period based on start time, then figure out
+    // seconds since midnight on our particular day
+    vector<pair<string,int> > vsp = get_service_period_ids_for_time(path->time);
+
     DEBUGPATH("Extending path at vertex %d (on %d) @ %f (walktime: %f, "
-              "routetime:%f)\n", src_id, last_route_id, path->time, 
-              path->walking_time, path->route_time);
+              "routetime: %f elapsed_daysecs: %d)\n", src_id, last_route_id, path->time, 
+              path->walking_time, path->route_time, elapsed_daysecs);
     shared_ptr<TripStop> src_stop = _get_tripstop(src_id);
 
     // Keep track of outgoing route ids at this node: make sure that we 
     // don't get on a route later when we could have gotten on here.
     list<int> outgoing_route_ids;
-    for (vector<string>::iterator i = service_period_ids.begin(); i != service_period_ids.end(); i++)
+    for (vector<pair<string, int> >::iterator i = vsp.begin(); i != vsp.end(); i++)
     {
-        list<int> route_ids = src_stop->get_routes(*i);
+        list<int> route_ids = src_stop->get_routes(i->first); 
         for (list<int>::iterator j = route_ids.begin(); j != route_ids.end(); j++) 
             outgoing_route_ids.push_back(*j);
     }
@@ -495,7 +501,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
                 continue;
                 
             shared_ptr<TripAction> action(
-                new TripAction(src_id, dest_id, -1, path->time, 
+                 new TripAction(src_id, dest_id, -1, path->time, 
                                (path->time + walktime)));
             shared_ptr<TripStop> ds = _get_tripstop(dest_id);
             shared_ptr<TripPath> path2 = path->add_action(
@@ -527,20 +533,18 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
         return;
 
     // Find outgoing triphops from the source and get a list of paths to them. 
-    for (vector<string>::iterator i = service_period_ids.begin(); 
-         i != service_period_ids.end(); i++)
+    for (vector<pair<string, int> >::iterator sp = vsp.begin(); sp != vsp.end();
+         sp++)
     {
-        list<int> route_ids = src_stop->get_routes(*i);
-
-        for (list<int>::iterator j = route_ids.begin(); j != outgoing_route_ids.end(); j++)
+        list<int> route_ids = src_stop->get_routes(sp->first);
+        for (list<int>::iterator j = route_ids.begin(); j != route_ids.end(); j++)
         {
             int LEEWAY = 0;
             if ((*j) != last_route_id)
                 LEEWAY = (5*60); // give 5 mins to make a transfer
 
-            shared_ptr<TripHop> t = src_stop->find_triphop((int)path->time + LEEWAY, 
-                                                           (*j), 
-                                                           (*i));
+            shared_ptr<TripHop> t = src_stop->find_triphop((int)elapsed_daysecs + sp->second + LEEWAY, 
+                                                           (*j), sp->first);
             if (t)
             {
                 // If we've been on the route before (or could have been), 

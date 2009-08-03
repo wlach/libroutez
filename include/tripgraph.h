@@ -30,7 +30,7 @@ class TripGraph
 
     TripStop get_tripstop(int32_t id);
 
-    std::vector<std::string> get_service_period_ids_for_time(time_t secs);
+    std::vector<std::pair<std::string, int> > get_service_period_ids_for_time(time_t secs);
 
 #ifdef SWIG
     %newobject find_path;
@@ -67,7 +67,6 @@ class TripGraph
     boost::shared_ptr<TripStop> get_nearest_stop(double lat, double lng);
 
     void extend_path(boost::shared_ptr<TripPath> &path, 
-                     std::vector<std::string> &service_period_ids, 
                      bool walkonly, int32_t end_id, int &num_paths_considered,
                      VisitedRouteMap &visited_routes, 
                      VisitedWalkMap &visited_walks, 
