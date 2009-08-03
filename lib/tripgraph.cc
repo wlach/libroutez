@@ -511,7 +511,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
                 ((v1->second->heuristic_weight - path2->heuristic_weight) < 1.0f &&
                  v1->second->walking_time > path2->walking_time))
             {
-                DEBUGPATH("-- Adding walkpath to %d\n", dest_id);
+                DEBUGPATH("-- Adding walkpath to %d (walktime: %f (%f, %f))\n", dest_id, walktime, action->start_time, action->end_time);
                 if (dest_id == goal_id)
                     completed_paths.push(path2);
                 else
