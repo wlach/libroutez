@@ -15,7 +15,7 @@ using namespace boost;
 #endif
 
 // Estimated walking speed in m/s
-static const float est_walk_speed = 1.1f;
+static const float EST_WALK_SPEED = 1.1f;
 static int SECS_IN_DAY = (60*60*24);
 
 
@@ -162,7 +162,7 @@ void TripGraph::add_walkhop(int32_t src_id, int32_t dest_id)
     double dist = distance(ts_src->lat, ts_src->lng,
                            ts_dest->lat, ts_dest->lng);
 
-    ts_src->add_walkhop(dest_id, dist / est_walk_speed);
+    ts_src->add_walkhop(dest_id, dist / EST_WALK_SPEED);
 }
 
 
@@ -281,7 +281,6 @@ void TripGraph::link_osm_gtfs()
         }
     }
 
-
     for (map<int32_t, pair<int32_t, int32_t> >::iterator i = new_walkhops.begin();
          i != new_walkhops.end(); i++)
     {
@@ -376,10 +375,10 @@ TripPath * TripGraph::find_path(time_t start, bool walkonly,
     // beginning, and add that to our start time.
     double dist_from_start = distance(src_lat, src_lng, 
                                       start_node->lat, start_node->lng);
-    start += (dist_from_start / est_walk_speed);
+    start += (dist_from_start / EST_WALK_SPEED);
 
     DEBUGPATH("- Start time - %d\n", start);
-    shared_ptr<TripPath> start_path(new TripPath(start, est_walk_speed, 
+    shared_ptr<TripPath> start_path(new TripPath(start, EST_WALK_SPEED, 
                                                  end_node, start_node));
     if (start_node == end_node)
         return new TripPath(*start_path);
