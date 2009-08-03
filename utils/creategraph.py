@@ -85,8 +85,8 @@ def load_gtfs(tripgraph, sched, idmap):
         # monday service == mon-fri service
         if service_period_bounds.has_key(sp_id):
             s = ServicePeriod(str(sp_id), 
-                              tm_start.tm_mday, tm_start.tm_mon, tm_start.tm_year,
-                              tm_start.tm_mday, tm_start.tm_mon, tm_start.tm_year,
+                              tm_start.tm_mday, tm_start.tm_mon, (tm_start.tm_year - 1900),
+                              tm_end.tm_mday, tm_end.tm_mon, (tm_end.tm_year - 1900),
                               int(service_period_bounds[sp_id]),
                               sp.day_of_week[0], sp.day_of_week[5], 
                               sp.day_of_week[6])
