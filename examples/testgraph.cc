@@ -19,10 +19,10 @@ void print_actions(shared_ptr<TripAction> &action)
 
 int main(int argc, char *argv[])
 {
-    if (argc < 8)
+    if (argc < 6)
     {
         printf("Usage: %s <graph file> <src lat> <src lng> <dest lat> "
-               "<dest lng> <start time (seconds since day start)> ", argv[0]);
+               "<dest lng> <start time> ", argv[0]);
         return 1;
     }
 
