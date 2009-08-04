@@ -6,6 +6,9 @@
 # FIXME: It would be nice to have some more ruby examples, but I'll leave
 # that to the ruby hackers.
 
+# This is all slightly icky, but it's probably enough to 
+# help you get started
+
 require 'routez'
 
 g = Routez::TripGraph.new()
@@ -27,14 +30,14 @@ path2.get_actions().each do |action|
 end
 
 
-gtfs_graph = Routez::TripGraph.new()
+g = Routez::TripGraph.new()
 
-gtfs_graph.add_tripstop(0, Routez::TripStop::GTFS, 44.6554236, -63.5936968) # north and agricola
-gtfs_graph.add_tripstop(1, Routez::TripStop::OSM, 44.6546407, -63.5948438) # north and robie (just north of north&agricola)
-gtfs_graph.add_tripstop(2, Routez::TripStop::GTFS, 44.6567144, -63.5919115) # north and northwood (just south of north&agricola)
-gtfs_graph.add_tripstop(3, Routez::TripStop::GTFS, 44.6432423, -63.6045261) # Quinpool and Connaught (a few kms away from north&agricola)
+g.add_tripstop(0, Routez::TripStop::GTFS, 44.6554236, -63.5936968) # north and agricola
+g.add_tripstop(1, Routez::TripStop::OSM, 44.6546407, -63.5948438) # north and robie (just north of north&agricola)
+g.add_tripstop(2, Routez::TripStop::GTFS, 44.6567144, -63.5919115) # north and northwood (just south of north&agricola)
+g.add_tripstop(3, Routez::TripStop::GTFS, 44.6432423, -63.6045261) # Quinpool and Connaught (a few kms away from north&agricola)
 
-stops = gtfs_graph.find_tripstops_in_range(44.6554236, -63.5936968, Routez::TripStop::GTFS, 500.0)
+stops = g.find_tripstops_in_range(44.6554236, -63.5936968, Routez::TripStop::GTFS, 500.0)
 
 stops.each do |stop|
   puts "id: #{stop.id} lat: #{stop.lat} lon: #{stop.lng} type: #{stop.type}"
