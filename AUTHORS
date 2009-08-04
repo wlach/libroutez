@@ -11,3 +11,7 @@ Brandon Martin Anderson <badhill@gmail.com>
 
 Peter McCurdy <petermccurdy@alumni.uwaterloo.ca>
  - Support for delaying walking to a stop at the start of a trip.
+ 
+Jason Madigan <jason@jasonmadigan.com>
+- Some updates to the README regarding building, and updates to
+  the ruby examples.
