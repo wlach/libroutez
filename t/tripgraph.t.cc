@@ -202,40 +202,6 @@ BOOST_AUTO_TEST_CASE(service_periods)
 }
 
 
-BOOST_AUTO_TEST_CASE(service_periods_save_load)
-{
-    TripGraph g;
-
-    // from the 1st to the 7th (i.e. 1st saturday only)
-    {
-        ServicePeriod s("saturday_2008", 1, 0, 108, 7, 0, 108, 2000, false, true, false);
-        g.add_service_period(s);
-    }
-    // add another service period (saturdays for month of january)
-    {
-        ServicePeriod s("saturday_jan_2008", 1, 0, 108, 31, 0, 108, 2000, false, true, 
-                        false);
-        g.add_service_period(s);
-    }
-
-
-    char *tmpgraphname = tmpnam(NULL); // security issues in unit tests? bah.
-    unlink(tmpgraphname);
-    g.save(tmpgraphname);
-
-    TripGraph g2;
-    g2.load(tmpgraphname);
-
-    {
-        vector<pair<string, int> > vsp = g2.get_service_period_ids_for_time(get_time_t(5, 0, 108));
-        BOOST_CHECK_EQUAL(vsp.size(), 2);
-        BOOST_CHECK(vsp[0].first==string("saturday_2008") || vsp[0].first==string("saturday_jan_2008"));
-        BOOST_CHECK(vsp[1].first==string("saturday_2008") || vsp[1].first==string("saturday_jan_2008"));
-        BOOST_CHECK_NE(vsp[0].first, vsp[1].first);
-    }    
-}
-
-
 BOOST_AUTO_TEST_CASE(service_periods_overlapping)
 {
     TripGraph g;
@@ -256,4 +222,84 @@ BOOST_AUTO_TEST_CASE(service_periods_overlapping)
     
     int weekday_index = (vsp[0].first == string("weekday_2008")) ? 0 : 1;
     BOOST_CHECK_EQUAL(vsp[weekday_index].second, 86400);
+}
+
+
+BOOST_AUTO_TEST_CASE(service_periods_turned_on_or_off)
+{
+    TripGraph g;
+
+    // from the 1st to the 7th (i.e. 1st saturday only)
+    // turn off weekday service on the 2nd (wednesday)
+    // turn on saturday service on the 3rd (keeping weekday service)
+    {
+        ServicePeriod s1("saturday_2008", 1, 0, 108, 7, 0, 108, 80000, false, true, false);
+        s1.add_exception_on(3, 0, 108);
+        BOOST_CHECK_EQUAL(s1.is_turned_on(3, 0, 108), true);
+        BOOST_CHECK_EQUAL(s1.is_turned_on(4, 0, 108), false);
+        g.add_service_period(s1);
+        ServicePeriod s2("weekday_2008", 1, 0, 108, 7, 0, 108, 80000, true, false, false);
+        s2.add_exception_off(2, 0, 108);
+        BOOST_CHECK_EQUAL(s2.is_turned_off(2, 0, 108), true);
+        BOOST_CHECK_EQUAL(s2.is_turned_off(3, 0, 108), false);
+        g.add_service_period(s2);
+    }
+
+    {    
+        // should be no service on the 2nd
+        vector<pair<string, int> > vsp = g.get_service_period_ids_for_time(get_time_t(2, 0, 108));
+        BOOST_CHECK_EQUAL(vsp.size(), 0);
+    }
+
+    {
+        // should be two service periods on the 3rd (saturday and weekday)
+        vector<pair<string, int> > vsp = g.get_service_period_ids_for_time(get_time_t(3, 0, 108));
+        BOOST_CHECK_EQUAL(vsp.size(), 2);
+        BOOST_CHECK(vsp[0].first==string("saturday_2008") || vsp[0].first==string("weekday_2008"));
+        BOOST_CHECK(vsp[1].first==string("saturday_2008") || vsp[1].first==string("weekday_2008"));
+        BOOST_CHECK_NE(vsp[0].first, vsp[1].first);
+    }    
+}
+
+
+BOOST_AUTO_TEST_CASE(service_periods_save_load)
+{
+    TripGraph g;
+
+    // use the same setup as the previous test: saturday and weekday schedules 
+    // with a few exceptions
+
+    // from the 1st to the 7th (i.e. 1st saturday only)
+    // turn off weekday service on the 2nd (wednesday)
+    // turn on saturday service on the 3rd (keeping weekday service)
+    {
+        ServicePeriod s1("saturday_2008", 1, 0, 108, 7, 0, 108, 80000, false, true, false);
+        s1.add_exception_on(3, 0, 108);
+        g.add_service_period(s1);
+        ServicePeriod s2("weekday_2008", 1, 0, 108, 7, 0, 108, 80000, true, false, false);
+        s2.add_exception_off(2, 0, 108);
+        g.add_service_period(s2);
+    }
+
+    char *tmpgraphname = tmpnam(NULL); // security issues in unit tests? bah.
+    unlink(tmpgraphname);
+    g.save(tmpgraphname);
+
+    TripGraph g2;
+    g2.load(tmpgraphname);
+
+    {    
+        // should be no service on the 2nd
+        vector<pair<string, int> > vsp = g2.get_service_period_ids_for_time(get_time_t(2, 0, 108));
+        BOOST_CHECK_EQUAL(vsp.size(), 0);
+    }
+
+    {
+        // should be two service periods on the 3rd (saturday and weekday)
+        vector<pair<string, int> > vsp = g2.get_service_period_ids_for_time(get_time_t(3, 0, 108));
+        BOOST_CHECK_EQUAL(vsp.size(), 2);
+        BOOST_CHECK(vsp[0].first==string("saturday_2008") || vsp[0].first==string("weekday_2008"));
+        BOOST_CHECK(vsp[1].first==string("saturday_2008") || vsp[1].first==string("weekday_2008"));
+        BOOST_CHECK_NE(vsp[0].first, vsp[1].first);
+    }    
 }

@@ -2,7 +2,18 @@
 #define __SERVICEPERIOD_H
 #include <stdint.h>
 #include <string>
+#include <vector>
 
+
+struct ServicePeriodException
+{
+    ServicePeriodException(int32_t _tm_mday, int32_t _tm_mon, int32_t _tm_year);
+    ServicePeriodException();
+
+    int32_t tm_mday;
+    int32_t tm_mon;
+    int32_t tm_year;
+};
 
 struct ServicePeriod
 {
@@ -13,6 +24,12 @@ struct ServicePeriod
     ServicePeriod(const ServicePeriod &s);
     ServicePeriod();
     ServicePeriod(FILE *fp);
+    
+    void add_exception_on(int32_t tm_mday, int32_t tm_mon, int32_t tm_year);
+    void add_exception_off(int32_t tm_mday, int32_t tm_mon, int32_t tm_year);
+
+    bool is_turned_on(int32_t tm_mday, int32_t tm_mon, int32_t tm_year);
+    bool is_turned_off(int32_t tm_mday, int32_t tm_mon, int32_t tm_year);
 
     void write(FILE *fp);
 
@@ -28,6 +45,14 @@ struct ServicePeriod
     bool weekday; 
     bool saturday;
     bool sunday;
+
+    // days that the service period is off (regardless of what the normal 
+    // schedule) says. E.g. a weekday sched on Xmas
+    std::vector<ServicePeriodException> exceptions_off;
+
+    // days that the service period is on (regardless of what the normal 
+    // schedule) says. E.g. a sunday sched on Xmas
+    std::vector<ServicePeriodException> exceptions_on;
 };
 
 #endif // __SERVICEPERIOD_H
