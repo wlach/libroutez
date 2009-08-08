@@ -472,11 +472,14 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
     // Keep track of outgoing route ids at this node: make sure that we 
     // don't get on a route later when we could have gotten on here.
     list<int> outgoing_route_ids;
-    for (vector<pair<string, int> >::iterator i = vsp.begin(); i != vsp.end(); i++)
+    if (!walkonly)
     {
-        list<int> route_ids = src_stop->get_routes(i->first); 
-        for (list<int>::iterator j = route_ids.begin(); j != route_ids.end(); j++) 
-            outgoing_route_ids.push_back(*j);
+        for (vector<pair<string, int> >::iterator i = vsp.begin(); i != vsp.end(); i++)
+        {
+            list<int> route_ids = src_stop->get_routes(i->first); 
+            for (list<int>::iterator j = route_ids.begin(); j != route_ids.end(); j++) 
+                outgoing_route_ids.push_back(*j);
+        }
     }
 
     // Explore walkhops that are better than the ones we've already visited.
