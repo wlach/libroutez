@@ -15,8 +15,9 @@ struct ServicePeriodException
     int32_t tm_year;
 };
 
-struct ServicePeriod
+class ServicePeriod
 {
+  public:
     ServicePeriod(std::string id, 
                   int32_t start_mday, int32_t start_mon, int32_t start_year, 
                   int32_t end_mday, int32_t end_mon, int32_t end_year, 

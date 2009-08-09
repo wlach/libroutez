@@ -90,7 +90,16 @@ def load_gtfs(tripgraph, sched, idmap):
                               int(service_period_bounds[sp_id]),
                               sp.day_of_week[0], sp.day_of_week[5], 
                               sp.day_of_week[6])
-            tripgraph.add_service_period(s) #int(service_period_bounds[sp_id]),
+            for ex in sp.date_exceptions.keys():
+                tm_ex = time.strptime(ex, "%Y%m%d")
+                if sp.date_exceptions[ex] == 1:
+                    s.add_exception_on(tm_ex.tm_mday, tm_ex.tm_mon, 
+                                       tm_ex.tm_year)
+                else:
+                    s.add_exception_off(tm_ex.tm_mday, tm_ex.tm_mon, 
+                                        tm_ex.tm_year)
+
+            tripgraph.add_service_period(s) 
         else:
             print "WARNING: It appears as if we have a service period with no "
             "bound. This implies that it's not actually being used for anything."
