@@ -85,19 +85,21 @@ def load_gtfs(tripgraph, sched, idmap):
         # monday service == mon-fri service
         if service_period_bounds.has_key(sp_id):
             s = ServicePeriod(str(sp_id), 
-                              tm_start.tm_mday, tm_start.tm_mon, (tm_start.tm_year - 1900),
-                              tm_end.tm_mday, tm_end.tm_mon, (tm_end.tm_year - 1900),
+                              tm_start.tm_mday, tm_start.tm_mon - 1, 
+                              (tm_start.tm_year - 1900),
+                              tm_end.tm_mday, tm_end.tm_mon - 1, 
+                              (tm_end.tm_year - 1900),
                               int(service_period_bounds[sp_id]),
                               sp.day_of_week[0], sp.day_of_week[5], 
                               sp.day_of_week[6])
             for ex in sp.date_exceptions.keys():
                 tm_ex = time.strptime(ex, "%Y%m%d")
                 if sp.date_exceptions[ex] == 1:
-                    s.add_exception_on(tm_ex.tm_mday, tm_ex.tm_mon, 
-                                       tm_ex.tm_year)
+                    s.add_exception_on(tm_ex.tm_mday, tm_ex.tm_mon - 1,
+                                       tm_ex.tm_year - 1900)
                 else:
-                    s.add_exception_off(tm_ex.tm_mday, tm_ex.tm_mon, 
-                                        tm_ex.tm_year)
+                    s.add_exception_off(tm_ex.tm_mday, tm_ex.tm_mon - 1,
+                                        tm_ex.tm_year - 1900)
 
             tripgraph.add_service_period(s) 
         else:
