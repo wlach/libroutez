@@ -7,12 +7,6 @@ using namespace std;
 using namespace boost;
 
 
-static bool operator<(const TripHop& x, const TripHop& y)
-{
-    return x.start_time < y.start_time;
-}
-
-
 TripStop::TripStop(FILE *fp) 
 {
     assert(fread(&id, sizeof(int32_t), 1, fp) == 1);

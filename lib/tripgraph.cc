@@ -354,6 +354,77 @@ vector<pair<string, int> > TripGraph::get_service_period_ids_for_time(int secs)
 }
 
 
+list<int> TripGraph::get_route_ids_for_stop(int stop_id, double time)
+{
+    list<int> all_route_ids;
+    shared_ptr<TripStop> ts = _get_tripstop(stop_id);
+    vector<pair<string,int> > vsp = get_service_period_ids_for_time(time);
+
+    for (vector<pair<string, int> >::iterator i = vsp.begin(); i != vsp.end();
+         i++)
+    {
+        list<int> route_ids = ts->get_routes(i->first);
+        for (list<int>::iterator j = route_ids.begin(); j != route_ids.end();
+             j++)
+        {
+            bool already_added = false;
+            for (list<int>::iterator k = all_route_ids.begin();
+                 k != all_route_ids.end();
+                 k++)
+            {
+                if ((*j) == (*k))
+                {
+                    already_added = true;
+                    break;
+                }
+            }
+
+            if (!already_added)
+                all_route_ids.push_back((*j));
+        }
+    }
+
+    return all_route_ids;
+}
+
+
+static bool sort_triphops(const TripHop &x, const TripHop &y)
+{
+    return x.start_time < y.start_time;
+}
+
+vector<TripHop> TripGraph::find_triphops_for_stop(int stop_id, int route_id,
+                                                  double time, int num)
+{
+    double elapsed_daysecs = (uint64_t)time % SECS_IN_DAY;
+
+    shared_ptr<TripStop> ts = _get_tripstop(stop_id);
+
+    vector<pair<string,int> > vsp = get_service_period_ids_for_time(time);
+    vector<TripHop> all_triphops;
+
+    for (vector<pair<string, int> >::iterator i = vsp.begin(); i != vsp.end();
+         i++)
+    {
+        list<int> route_ids = ts->get_routes(i->first);
+
+        vector<TripHop> triphops = ts->find_triphops(elapsed_daysecs +
+                                                     i->second,
+                                                     route_id, i->first, num);
+        for (vector<TripHop>::iterator k = triphops.begin();
+             k != triphops.end(); k++)
+            all_triphops.push_back(*k);
+    }
+
+    ::sort(all_triphops.begin(), all_triphops.end(), sort_triphops);
+
+    if (all_triphops.size() > num)
+        all_triphops.resize(num);
+
+    return all_triphops;
+}
+
+
 TripPath * TripGraph::find_path(double start, bool walkonly,
                                 double src_lat, double src_lng, 
                                 double dest_lat, double dest_lng)

@@ -104,6 +104,69 @@ BOOST_AUTO_TEST_CASE(impossible_path)
 }
 
 
+BOOST_AUTO_TEST_CASE(getting_route_ids)
+{
+    TripGraph g;
+
+    g.add_tripstop(0, TripStop::OSM, 0.0f, 0.0f);
+    g.add_tripstop(1, TripStop::OSM, 1.0f, 0.0f);
+
+    ServicePeriod s("all", 0, 0, 0, 7, 0, 100, 2000, true, true, true);
+    g.add_service_period(s);
+    ServicePeriod s1("all2", 0, 0, 0, 7, 0, 100, 2000, true, true, true);
+    g.add_service_period(s1);
+
+    list<int> route_ids;
+
+    // just one triphop, route id 1
+    g.add_triphop(500, 1000, 0, 1, 1, 1, "all");
+    route_ids = g.get_route_ids_for_stop(0, 0.0f);
+    BOOST_CHECK_EQUAL(route_ids.size(), 1);
+    BOOST_CHECK(*route_ids.begin() == 1);
+
+    // an identical triphop, different service period, same route id
+    g.add_triphop(500, 1000, 0, 1, 1, 1, "all2");
+    route_ids = g.get_route_ids_for_stop(0, 0.0f);
+    BOOST_CHECK_EQUAL(route_ids.size(), 1);
+    BOOST_CHECK_EQUAL(*route_ids.begin(), 1);
+
+    // an identical triphop, different service period, diff route id
+    g.add_triphop(500, 1000, 0, 1, 2, 1, "all2");
+
+    route_ids = g.get_route_ids_for_stop(0, 0.0f);
+    BOOST_CHECK_EQUAL(route_ids.size(), 2);
+    BOOST_CHECK(*route_ids.begin() == 1 || *route_ids.begin() == 2);    BOOST_CHECK(*(++(route_ids.begin())) == 1 || *(++(route_ids.begin())) == 2);
+    BOOST_CHECK_NE(*(route_ids.begin()), *(++(route_ids.begin())));
+}
+
+
+BOOST_AUTO_TEST_CASE(find_triphops_for_stop)
+{
+    TripGraph g;
+
+    g.add_tripstop(0, TripStop::OSM, 0.0f, 0.0f);
+    g.add_tripstop(1, TripStop::OSM, 1.0f, 0.0f);
+
+    ServicePeriod s("all", 0, 0, 0, 7, 0, 100, 2000, true, true, true);
+    g.add_service_period(s);
+    ServicePeriod s1("all2", 0, 0, 0, 7, 0, 100, 2000, true, true, true);
+    g.add_service_period(s1);
+
+    for (int i=0; i<5; i++)
+    {
+        g.add_triphop(500 + i, 1000 + i, 0, 1, 1, 1, "all");
+    }
+    g.add_triphop(501, 1001, 0, 1, 1, 1, "all2");
+
+
+    vector<TripHop> ths = g.find_triphops_for_stop(0, 1, 0, 3);
+    BOOST_CHECK_EQUAL(ths.size(), 3);
+    BOOST_CHECK_EQUAL(ths[0].start_time, 500);
+    BOOST_CHECK_EQUAL(ths[1].start_time, 501);
+    BOOST_CHECK_EQUAL(ths[2].start_time, 501);
+}
+
+
 BOOST_AUTO_TEST_CASE(tripstops_in_range)
 {
     TripGraph g;
