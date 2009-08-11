@@ -339,8 +339,10 @@ vector<pair<string, int> > TripGraph::get_service_period_ids_for_time(int secs)
         {
             time_t mysecs = secs - offset;
             struct tm * t = localtime(&mysecs);
-            if (i->second.start_time <= mysecs && i->second.end_time >= mysecs && 
-                (((t->tm_wday == 6 && i->second.saturday) || (t->tm_wday == 0 && i->second.sunday) ||
+            if (i->second.start_time <= mysecs &&
+                i->second.end_time >= mysecs &&
+                (((t->tm_wday == 6 && i->second.saturday) ||
+                  (t->tm_wday == 0 && i->second.sunday) ||
                  (t->tm_wday > 0 && t->tm_wday < 6 && i->second.weekday)) && 
                  !i->second.is_turned_off(t->tm_mday, t->tm_mon, t->tm_year)) || 
                 i->second.is_turned_on(t->tm_mday, t->tm_mon, t->tm_year))
