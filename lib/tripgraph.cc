@@ -396,7 +396,11 @@ static bool sort_triphops(const TripHop &x, const TripHop &y)
 vector<TripHop> TripGraph::find_triphops_for_stop(int stop_id, int route_id,
                                                   double time, int num)
 {
-    double elapsed_daysecs = (uint64_t)time % SECS_IN_DAY;
+    time_t secs = (time_t)time;
+    struct tm * t = localtime(&secs);
+
+    double elapsed_daysecs = t->tm_sec + (t->tm_min * 60) + (t->tm_hour *
+                                                              60 * 60);
 
     shared_ptr<TripStop> ts = _get_tripstop(stop_id);
 
@@ -406,14 +410,20 @@ vector<TripHop> TripGraph::find_triphops_for_stop(int stop_id, int route_id,
     for (vector<pair<string, int> >::iterator i = vsp.begin(); i != vsp.end();
          i++)
     {
-        list<int> route_ids = ts->get_routes(i->first);
-
         vector<TripHop> triphops = ts->find_triphops(elapsed_daysecs +
                                                      i->second,
                                                      route_id, i->first, num);
         for (vector<TripHop>::iterator k = triphops.begin();
              k != triphops.end(); k++)
+        {
+            // if we have a time offset (ex. we're looking at yesterday's
+            // schedules late night stops), subtract that from the triphop's
+            // time
+            (*k).start_time -= i->second;
+            (*k).end_time -= i->second;
+
             all_triphops.push_back(*k);
+        }
     }
 
     ::sort(all_triphops.begin(), all_triphops.end(), sort_triphops);
