@@ -140,8 +140,11 @@ BOOST_AUTO_TEST_CASE(getting_route_ids)
 }
 
 
-BOOST_AUTO_TEST_CASE(find_triphops_for_stop)
+WVTEST_MAIN("find_triphops_for_stop")
 {
+    setenv("TZ", "GMT", 1);
+    tzset();
+
     TripGraph g;
 
     g.add_tripstop(0, TripStop::OSM, 0.0f, 0.0f);
