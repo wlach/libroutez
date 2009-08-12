@@ -22,8 +22,8 @@ config.mk:
 	@exit 1
 
 %.o: %.cc 
-	g++ $< -c -o $@ $(CXXFLAGS) $(PYTHON_CFLAGS) $(RUBY_CFLAGS) -I./include -g
-	@g++ $< -MM $(CXXFLAGS) $(PYTHON_CFLAGS) $(RUBY_CFLAGS) -I./include > $*.d
+	g++ $< -c -o $@ $(CXXFLAGS) $(PYTHON_CFLAGS) $(RUBY_CFLAGS) -D WVTEST_CONFIGURED -I./include -I./wvtest/cpp -g
+	@g++ $< -MM $(CXXFLAGS) $(PYTHON_CFLAGS) $(RUBY_CFLAGS) -D WVTEST_CONFIGURED -I./include -I./wvtest/cpp > $*.d
 	@mv -f $*.d $*.d.tmp
 	@sed -e 's|.*:|$*.o:|' < $*.d.tmp > $*.d
 	@sed -e 's/.*://' -e 's/\\$$//' < $*.d.tmp | fmt -1 | \
@@ -55,18 +55,25 @@ examples/testgraph: examples/testgraph.o libroutez.so
 
 # unit test suite
 TEST_OBJS=t/tripgraph.t.o t/tripstop.t.o t/all.t.o
-t/all.t: $(TEST_OBJS) libroutez.so
-	g++ $(TEST_OBJS) -o $@ libroutez.so -fPIC -g
+WVTEST_OBJS=wvtest/cpp/wvtest.o wvtest/cpp/wvtestmain.o
+t/all.t: $(TEST_OBJS) $(WVTEST_OBJS) libroutez.so
+	g++ $(TEST_OBJS) $(WVTEST_OBJS) -o $@ libroutez.so -fPIC -g
 
-.PHONY: test
-test: t/all.t
-	LD_LIBRARY_PATH=$(PWD) valgrind --tool=memcheck --suppressions=t/boost.supp t/all.t
+.PHONY: test test-cpp test-python
+test: test-cpp test-python
+
+test-cpp: t/all.t
+	LD_LIBRARY_PATH=$(PWD) valgrind --tool=memcheck --suppressions=t/boost.supp wvtest/wvtestrun t/all.t
+
+test-python: python/libroutez/tripgraph.py python/libroutez/_tripgraph.so
+	LD_LIBRARY_PATH=$(PWD) PYTHONPATH=$(PWD)/t:$(PWD)/python:$(PYTHONPATH) wvtest/wvtestrun python wvtest/python/wvtestmain.py pytest.py
 
 clean:
 	rm -f *.so lib/*.o python/*.pyc */*.pyc examples/testgraph \
 	python/libroutez/_tripgraph.so python/libroutez/tripgraph.py \
 	python/libroutez/tripgraph_wrap_py.cc python/libroutez/*.o \
 	ruby/routez.so ruby/*.o ruby/routez_wrap_rb.cc \
-	t/*.o t/all.t *.d
+	wvtest/cpp/*.o wvtest/cpp/*.d \
+	t/*.o t/*.d t/all.t *.d
 
 -include $(TRIPGRAPH_OBJECTS:.o=.d)
