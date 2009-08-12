@@ -24,6 +24,7 @@ def basic_find_path():
     actions = p.get_actions()
     WVPASSEQ(len(actions), 1)
 
+
 @wvtest 
 def get_service_period_offsets():
     graph = TripGraph()
@@ -33,3 +34,12 @@ def get_service_period_offsets():
     splist = graph.get_service_period_ids_for_time(int(t))
     WVPASSEQ(splist[0][0], "foo1")
     WVPASSEQ(splist[0][1], 0)
+
+
+@wvtest
+def tripstop():
+    ts = TripStop(0, TripStop.OSM, 0.0, 0.0);
+    ts.add_triphop(500, 1000, 1, 1, 1, "all");
+    route_ids = ts.get_routes("all")
+    WVPASSEQ(len(route_ids), 1)
+    WVPASSEQ(route_ids[0], 1)
