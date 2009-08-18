@@ -14,22 +14,39 @@ TripStop::TripStop(FILE *fp)
     assert(fread(&lat, sizeof(float), 1, fp) == 1);
     assert(fread(&lng, sizeof(float), 1, fp) == 1);
         
-    uint32_t num_triphops = 0;
-    assert(fread(&num_triphops, sizeof(uint32_t), 1, fp) == 1);
+    uint8_t have_triphops;
+    assert(fread(&have_triphops, sizeof(uint8_t), 1, fp) == 1);
 
-    if (num_triphops > 0)
+    if (have_triphops)
     {
         tdict = shared_ptr<ServiceDict>(new ServiceDict);
-        for (int i=0; i<num_triphops; i++)
+
+        uint32_t num_service_periods;
+        assert(fread(&num_service_periods, sizeof(uint32_t), 1, fp) == 1);
+        for (uint32_t i=0; i<num_service_periods; i++)
         {
             char service_period[MAX_ID_LEN];
-            int32_t route_id;
             assert(fread(service_period, 1, MAX_ID_LEN, fp) == MAX_ID_LEN);
-            assert(fread(&route_id, sizeof(int32_t), 1, fp) == 1);
-            TripHop *t = new TripHop;
-            assert(fread(t, sizeof(TripHop), 1, fp) == 1);
-            assert(t->end_time >= t->start_time); // FIXME: should be >, no?
-            (*tdict)[service_period][route_id].push_back(shared_ptr<TripHop>(t));
+
+            uint32_t num_route_ids;
+            assert(fread(&num_route_ids, sizeof(uint32_t), 1, fp) == 1);
+            for (uint32_t j=0; j<num_route_ids; j++)
+            {
+                int32_t route_id;
+                assert(fread(&route_id, sizeof(int32_t), 1, fp) == 1);
+
+                uint32_t num_triphops = 0;
+                assert(fread(&num_triphops, sizeof(uint32_t), 1, fp) == 1);
+                (*tdict)[service_period][route_id].reserve(num_triphops);
+                for (uint32_t k=0; k<num_triphops; k++)
+                {
+                    TripHop *t = new TripHop;
+                    assert(fread(t, sizeof(TripHop), 1, fp) == 1);
+                    assert(t->end_time >= t->start_time); // FIXME: should be >, no?
+                    (*tdict)[service_period][route_id].push_back(shared_ptr<TripHop>(t));
+                }
+            }
+
         }
     }
 
@@ -65,33 +82,34 @@ void TripStop::write(FILE *fp)
     assert(fwrite(&type, sizeof(Type), 1, fp) == 1);
     assert(fwrite(&lat, sizeof(float), 1, fp) == 1);
     assert(fwrite(&lng, sizeof(float), 1, fp) == 1);
+
     
-    uint32_t num_triphops = 0;
+    uint8_t have_triphops = tdict ? 1 : 0;
+    assert(fwrite(&have_triphops, sizeof(uint8_t), 1, fp) == 1);
+
     if (tdict)
     {
-        for (ServiceDict::iterator i = tdict->begin(); i != tdict->end(); i++)
-        {
-            for (TripHopDict::iterator j = i->second.begin(); 
-                 j != i->second.end(); j++)
-                num_triphops += j->second.size();
-        }
-    }
-    
-    assert(fwrite(&num_triphops, sizeof(uint32_t), 1, fp) == 1);    
-    if (tdict)
-    {
+        uint32_t num_service_periods = tdict->size();
+        assert(fwrite(&num_service_periods, sizeof(uint32_t), 1, fp) == 1);
+
         for (ServiceDict::iterator i = tdict->begin(); i != tdict->end(); i++)
         {
             char service_period[MAX_ID_LEN];
             strncpy(service_period, i->first.c_str(), MAX_ID_LEN);
-            for (TripHopDict::iterator j = i->second.begin(); j != i->second.end(); j++)
+            assert(fwrite(service_period, sizeof(char), MAX_ID_LEN, fp) == MAX_ID_LEN);
+            uint32_t num_route_ids = i->second.size();
+            assert(fwrite(&num_route_ids, sizeof(uint32_t), 1, fp) == 1);
+            for (TripHopDict::iterator j = i->second.begin();
+                 j != i->second.end(); j++)
             {
                 int32_t route_id = j->first;
-                for (TripHopList::iterator k = j->second.begin(); k != j->second.end(); k++)                
+                assert(fwrite(&route_id, sizeof(int32_t), 1, fp) == 1);
+                uint32_t num_triphops = j->second.size();
+                assert(fwrite(&num_triphops, sizeof(uint32_t), 1, fp) == 1);
+                for (TripHopList::iterator k = j->second.begin();
+                     k != j->second.end(); k++)
                 {
                     shared_ptr<TripHop> t = (*k);
-                    assert(fwrite(service_period, sizeof(char), MAX_ID_LEN, fp) == MAX_ID_LEN);
-                    assert(fwrite(&route_id, sizeof(int32_t), 1, fp) == 1);
                     assert(fwrite(k->get(), sizeof(TripHop), 1, fp) == 1);
                 }
             }
