@@ -5,6 +5,7 @@ import libroutez.osm as osm
 import time
 import sys
 from libroutez.tripgraph import *
+from optparse import OptionParser
 
 class IdMap:
     '''class which maps from gtfs ids -> libroutez ids'''
@@ -127,27 +128,38 @@ def load_osm(tripgraph, map, idmap):
             previd = osmid
 
 if __name__ == '__main__':
-    if len(sys.argv) < 5:
-        print "Usage: %s: <gtfs feed> <osm file> <graph> <gtfs mapping>" \
-            % sys.argv[0]
+
+    usage = "usage: %prog [options] <gtfs feed> <graph> <gtfs mapping>"
+    parser = OptionParser(usage)
+    parser.add_option('--osm', dest='osm',
+                      help='Path of OSM file (optional)')
+
+    (options, args) = parser.parse_args()
+
+    if len(args) < 3:
+        parser.error("incorrect number of arguments")
         exit(1)
 
-    idmap = IdMap()
-    print "Loading OSM." 
-    map = osm.OSM(sys.argv[2])
     print "Loading schedule."
     schedule = transitfeed.Schedule(
         problem_reporter=transitfeed.ProblemReporter())
-    schedule.Load(sys.argv[1])
+    schedule.Load(args[0])
     print "Creating graph"
     g = TripGraph()
     print "Inserting gtfs into graph"
+    idmap = IdMap()
     load_gtfs(g, schedule, idmap)
-    print "Inserting osm into graph"
-    load_osm(g, map, idmap)
+
+    if options.osm:
+        print "Loading OSM."
+        map = osm.OSM(options.osm)
+        print "Inserting osm into graph"
+        load_osm(g, map, idmap)
+        print "Linking osm with gtfs"
+        g.link_osm_gtfs()
+
     print "Saving idmap"
-    idmap.save(sys.argv[4])
-    print "Linking osm with gtfs"
-    g.link_osm_gtfs()
+    idmap.save(args[2])
+
     print "Saving graph"
-    g.save(sys.argv[3])
+    g.save(args[1])

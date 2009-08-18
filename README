@@ -92,8 +92,8 @@ is used to create this.
 The invocation is pretty simple. If you want to create a graph file called
 'mygraph.routez', simply invoke creategraph.py as follows:
 
-   ./creategraph.py /path/to/gtfsfeed.zip /path/to/osmfile.osm mygraph.routez \
-   mygraph-gtfsmapping.yml
+   ./creategraph.py /path/to/gtfsfeed.zip --osm="/path/to/osmfile.osm" \
+   mygraph.routez mygraph-gtfsmapping.yml
 
 Want some sample data to play with? You can download the combination of
 William Lachance's Halifax GTFS and Geobase data:
