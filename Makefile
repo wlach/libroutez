@@ -49,7 +49,9 @@ ruby/routez_wrap_rb.cc: routez.i tripgraph.i
 ruby/routez.so: libroutez.so ruby/routez_wrap_rb.o
 	g++ -o ruby/routez.so ruby/routez_wrap_rb.o libroutez.so $(LDFLAGS) $(RUBY_LDFLAGS) -I./include -fPIC
 
-# stupid test program
+# stupid test programs
+examples/loadgraph: examples/loadgraph.o libroutez.so
+	g++ $< -o $@ libroutez.so -fPIC -g -I./include
 examples/testgraph: examples/testgraph.o libroutez.so
 	g++ $< -o $@ libroutez.so -fPIC -g -I./include
 
