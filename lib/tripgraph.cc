@@ -547,8 +547,8 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
             if ((*j) != last_route_id)
                 LEEWAY = (5*60); // give 5 mins to make a transfer
 
-            shared_ptr<TripHop> t = src_stop->find_triphop(elapsed_daysecs + sp->second + LEEWAY, 
-                                                           (*j), sp->first);
+            const TripHop * t = src_stop->find_triphop(
+                elapsed_daysecs + sp->second + LEEWAY, (*j), sp->first);
             if (t)
             {
                 // If we've been on the route before (or could have been), 

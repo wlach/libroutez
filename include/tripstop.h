@@ -63,12 +63,12 @@ struct TripStop
                      int32_t route_id, int32_t trip_id, std::string service_id);
     void add_walkhop(int32_t dest_id, float walktime);
     std::list<int> get_routes(std::string service_id);
-    boost::shared_ptr<TripHop> find_triphop(int time, int route_id, 
-                                            std::string service_period);
+    const TripHop * find_triphop(int time, int route_id, 
+                                 std::string service_period);
     std::vector<TripHop> find_triphops(
         int time, int route_id, std::string service_period, int num);
 
-    typedef std::vector<boost::shared_ptr<TripHop> > TripHopList;
+    typedef std::vector<TripHop> TripHopList;
     typedef boost::unordered_map<int, TripHopList> TripHopDict;
     typedef boost::unordered_map<std::string, TripHopDict> ServiceDict;
     typedef boost::unordered_map<int32_t, float> WalkHopDict;

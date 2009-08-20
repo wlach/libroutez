@@ -40,10 +40,10 @@ TripStop::TripStop(FILE *fp)
                 (*tdict)[service_period][route_id].reserve(num_triphops);
                 for (uint32_t k=0; k<num_triphops; k++)
                 {
-                    TripHop *t = new TripHop;
-                    assert(fread(t, sizeof(TripHop), 1, fp) == 1);
-                    assert(t->end_time >= t->start_time); // FIXME: should be >, no?
-                    (*tdict)[service_period][route_id].push_back(shared_ptr<TripHop>(t));
+                    TripHop t;
+                    assert(fread(&t, sizeof(TripHop), 1, fp) == 1);
+                    assert(t.end_time >= t.start_time); // FIXME: should be >, no?
+                    (*tdict)[service_period][route_id].push_back(t);
                 }
             }
 
@@ -109,8 +109,7 @@ void TripStop::write(FILE *fp)
                 for (TripHopList::iterator k = j->second.begin();
                      k != j->second.end(); k++)
                 {
-                    shared_ptr<TripHop> t = (*k);
-                    assert(fwrite(k->get(), sizeof(TripHop), 1, fp) == 1);
+                    assert(fwrite(&(*k), sizeof(TripHop), 1, fp) == 1);
                 }
             }
         }
@@ -125,10 +124,10 @@ void TripStop::write(FILE *fp)
 }
 
 
-static bool sort_triphops(const shared_ptr<TripHop> &x, 
-                          const shared_ptr<TripHop> &y)
+static bool sort_triphops(const TripHop &x, 
+                          const TripHop &y)
 {
-    return x->start_time < y->start_time;
+    return x.start_time < y.start_time;
 }
 
 
@@ -139,10 +138,8 @@ void TripStop::add_triphop(int32_t start_time, int32_t end_time,
     if (!tdict)
         tdict = shared_ptr<ServiceDict>(new ServiceDict);
     
-    (*tdict)[service_id][route_id].push_back(shared_ptr<TripHop>(
-                                              new TripHop(start_time, 
-                                                          end_time, dest_id,
-                                                          trip_id)));
+    (*tdict)[service_id][route_id].push_back(TripHop(start_time, end_time, 
+                                                     dest_id, trip_id));
     ::sort((*tdict)[service_id][route_id].begin(), 
            (*tdict)[service_id][route_id].end(), sort_triphops);
 }
@@ -154,20 +151,20 @@ void TripStop::add_walkhop(int32_t dest_id, float walktime)
 }
 
 
-shared_ptr<TripHop> TripStop::find_triphop(int time, int route_id, 
-                                           string service_id)
+const TripHop * TripStop::find_triphop(int time, int route_id, 
+                                       string service_id)
 {
     if (tdict) 
     {
         for (TripHopList::iterator i = (*tdict)[service_id][route_id].begin();
              i != (*tdict)[service_id][route_id].end(); i++)
         {
-            if ((*i)->start_time >= time)
-                return (*i);
+            if ((*i).start_time >= time)
+                return &(*i);
         }
     }
 
-    return shared_ptr<TripHop>();
+    return NULL;
 }
 
 
@@ -183,8 +180,8 @@ vector<TripHop> TripStop::find_triphops(int time, int route_id,
              (i != ((*tdict)[service_id][route_id].end()) && tlist.size() < num); 
              i++)
         {
-            if ((*i)->start_time >= time)
-                tlist.push_back(*(*i));
+            if ((*i).start_time >= time)
+                tlist.push_back(*i);
         }
     }
 
