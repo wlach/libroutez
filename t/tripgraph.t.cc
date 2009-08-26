@@ -22,6 +22,8 @@ WVTEST_MAIN("basic_graph_pathfinding")
         TripAction action = actions.front();
         WVPASSEQ(action.src_id, 0);
         WVPASSEQ(action.dest_id, 1);
+
+        delete p;
     }
 
     // take the triphop if we have it
