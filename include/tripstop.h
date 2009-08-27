@@ -60,17 +60,16 @@ struct TripStop
     void write(FILE *fp);
 
     void add_triphop(int32_t start_time, int32_t end_time, int32_t dest_id, 
-                     int32_t route_id, int32_t trip_id, std::string service_id);
+                     int32_t route_id, int32_t trip_id, int32_t service_id);
     void add_walkhop(int32_t dest_id, float walktime);
-    std::list<int> get_routes(std::string service_id);
-    const TripHop * find_triphop(int time, int route_id, 
-                                 std::string service_period);
+    std::list<int> get_routes(int32_t service_id);
+    const TripHop * find_triphop(int time, int route_id, int32_t service_id);
     std::vector<TripHop> find_triphops(
-        int time, int route_id, std::string service_period, int num);
+        int time, int route_id, int32_t service_id, int num);
 
     typedef std::vector<TripHop> TripHopList;
     typedef boost::unordered_map<int, TripHopList> TripHopDict;
-    typedef boost::unordered_map<std::string, TripHopDict> ServiceDict;
+    typedef boost::unordered_map<int32_t, TripHopDict> ServiceDict;
     typedef boost::unordered_map<int32_t, float> WalkHopDict;
 
     // we keep a pointer to a tdict, as most nodes won't have one and we

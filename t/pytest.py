@@ -28,18 +28,18 @@ def basic_find_path():
 @wvtest 
 def get_service_period_offsets():
     graph = TripGraph()
-    graph.add_service_period(ServicePeriod("foo1", 1, 0, 108, 7, 0, 108, 2000, 
+    graph.add_service_period(ServicePeriod(0, 1, 0, 108, 7, 0, 108, 2000,
                                            False, True, False))
     t = time.mktime((2008, 1, 5, 0, 0, 0, 0, 0, -1))
     splist = graph.get_service_period_ids_for_time(int(t))
-    WVPASSEQ(splist[0][0], "foo1")
+    WVPASSEQ(splist[0][0], 0)
     WVPASSEQ(splist[0][1], 0)
 
 
 @wvtest
 def tripstop():
     ts = TripStop(0, TripStop.OSM, 0.0, 0.0);
-    ts.add_triphop(500, 1000, 1, 1, 1, "all");
-    route_ids = ts.get_routes("all")
+    ts.add_triphop(500, 1000, 1, 1, 1, 0);
+    route_ids = ts.get_routes(0)
     WVPASSEQ(len(route_ids), 1)
     WVPASSEQ(route_ids[0], 1)

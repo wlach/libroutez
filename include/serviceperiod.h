@@ -1,7 +1,8 @@
 #ifndef __SERVICEPERIOD_H
 #define __SERVICEPERIOD_H
 #include <stdint.h>
-#include <string>
+#include <stdio.h>
+#include <time.h>
 #include <vector>
 
 
@@ -18,7 +19,7 @@ struct ServicePeriodException
 class ServicePeriod
 {
   public:
-    ServicePeriod(std::string id, 
+    ServicePeriod(int32_t id,
                   int32_t start_mday, int32_t start_mon, int32_t start_year, 
                   int32_t end_mday, int32_t end_mon, int32_t end_year, 
                   int32_t duration, bool weekday, bool saturday, bool sunday);
@@ -34,7 +35,7 @@ class ServicePeriod
 
     void write(FILE *fp);
 
-    std::string id;
+    int32_t id;
 
     // start/end time: the range of dates for which the service period is 
     // valid (e.g. Jan 2008 - Sep 2009)

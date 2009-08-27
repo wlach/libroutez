@@ -64,7 +64,7 @@ void TripGraph::load(string fname)
         return;
     }
 
-    uint32_t num_service_periods = 0;
+    uint32_t num_service_periods;
     if (fread(&num_service_periods, sizeof(uint32_t), 1, fp) != 1)
     {
         printf("Error: Couldn't read the number of service periods.\n");
@@ -76,7 +76,7 @@ void TripGraph::load(string fname)
         add_service_period(s);
     }
         
-    uint32_t num_tripstops = 0;
+    uint32_t num_tripstops;
     if (fread(&num_tripstops, sizeof(uint32_t), 1, fp) != 1)
     {
         printf("Error: Couldn't read the number of tripstops.\n");
@@ -106,14 +106,11 @@ void TripGraph::save(string fname)
     }
 
     // write service periods
-    uint32_t num_service_periods = 0;
-    for (ServicePeriodDict::iterator i = sdict.begin(); i != sdict.end(); 
-         i++)
-        num_service_periods++;
+    uint32_t num_service_periods = splist.size();
     assert(fwrite(&num_service_periods, sizeof(uint32_t), 1, fp) == 1);
-    for (ServicePeriodDict::iterator i = sdict.begin(); i != sdict.end(); 
+    for (ServicePeriodList::iterator i = splist.begin(); i != splist.end();
          i++)
-        i->second.write(fp);
+        i->write(fp);
 
     // write tripstops
     uint32_t num_tripstops = tripstops.size();
@@ -130,13 +127,14 @@ void TripGraph::save(string fname)
 
 void TripGraph::add_service_period(ServicePeriod &service_period)
 {
-    sdict[service_period.id] = service_period;
+    assert(service_period.id == splist.size());
+    splist.push_back(service_period);
 }
 
 
 void TripGraph::add_triphop(int32_t start_time, int32_t end_time, 
                             int32_t src_id, int32_t dest_id, int32_t route_id, 
-                            int32_t trip_id, string service_id)
+                            int32_t trip_id, int32_t service_id)
 {
     // will assert if src_id doesn't exist!!
     _get_tripstop(src_id)->add_triphop(start_time, end_time, dest_id, route_id, 
@@ -329,25 +327,25 @@ TripStop TripGraph::get_tripstop(int32_t id)
 }
 
 
-vector<pair<string, int> > TripGraph::get_service_period_ids_for_time(int secs)
+vector<pair<int, int> > TripGraph::get_service_period_ids_for_time(int secs)
 {
-    vector<pair<string, int> > vsp;
+    vector<pair<int, int> > vsp;
 
-    for (ServicePeriodDict::iterator i = sdict.begin(); i != sdict.end(); i++)
+    for (ServicePeriodList::iterator i = splist.begin(); i != splist.end(); i++)
     {
-        for (int offset = 0; offset < i->second.duration; offset += SECS_IN_DAY)
+        for (int offset = 0; offset < i->duration; offset += SECS_IN_DAY)
         {
             time_t mysecs = secs - offset;
             struct tm * t = localtime(&mysecs);
-            if (i->second.start_time <= mysecs &&
-                i->second.end_time >= mysecs &&
-                (((t->tm_wday == 6 && i->second.saturday) ||
-                  (t->tm_wday == 0 && i->second.sunday) ||
-                 (t->tm_wday > 0 && t->tm_wday < 6 && i->second.weekday)) && 
-                 !i->second.is_turned_off(t->tm_mday, t->tm_mon, t->tm_year)) || 
-                i->second.is_turned_on(t->tm_mday, t->tm_mon, t->tm_year))
+            if (i->start_time <= mysecs &&
+                i->end_time >= mysecs &&
+                (((t->tm_wday == 6 && i->saturday) ||
+                  (t->tm_wday == 0 && i->sunday) ||
+                 (t->tm_wday > 0 && t->tm_wday < 6 && i->weekday)) &&
+                 !i->is_turned_off(t->tm_mday, t->tm_mon, t->tm_year)) ||
+                i->is_turned_on(t->tm_mday, t->tm_mon, t->tm_year))
             {
-                vsp.push_back(pair<string, int>(i->first, offset));
+                vsp.push_back(pair<int, int>(i->id, offset));
             }
         }
     }
@@ -464,7 +462,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
 
     // Figure out service period based on start time, then figure out
     // seconds since midnight on our particular day
-    vector<pair<string,int> > vsp = get_service_period_ids_for_time(path->time);
+    vector<pair<int, int> > vsp = get_service_period_ids_for_time(path->time);
 
     DEBUGPATH("Extending path at vertex %d (on %d) @ %f (walktime: %f, "
               "routetime: %f elapsed_daysecs: %d)\n", src_id, last_route_id, path->time, 
@@ -476,7 +474,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
     list<int> outgoing_route_ids;
     if (!walkonly)
     {
-        for (vector<pair<string, int> >::iterator i = vsp.begin(); i != vsp.end(); i++)
+        for (vector<pair<int, int> >::iterator i = vsp.begin(); i != vsp.end(); i++)
         {
             list<int> route_ids = src_stop->get_routes(i->first); 
             for (list<int>::iterator j = route_ids.begin(); j != route_ids.end(); j++) 
@@ -537,7 +535,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
         return;
 
     // Find outgoing triphops from the source and get a list of paths to them. 
-    for (vector<pair<string, int> >::iterator sp = vsp.begin(); sp != vsp.end();
+    for (vector<pair<int, int> >::iterator sp = vsp.begin(); sp != vsp.end();
          sp++)
     {
         list<int> route_ids = src_stop->get_routes(sp->first);

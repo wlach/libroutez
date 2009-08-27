@@ -40,7 +40,7 @@ ServicePeriodException::ServicePeriodException()
 }
 
 
-ServicePeriod::ServicePeriod(std::string _id, int32_t _start_mday, 
+ServicePeriod::ServicePeriod(int32_t _id, int32_t _start_mday,
                              int32_t _start_mon, int32_t _start_year, 
                              int32_t _end_mday, int32_t _end_mon, 
                              int32_t _end_year, int32_t _duration, 
@@ -70,6 +70,14 @@ ServicePeriod::ServicePeriod(const ServicePeriod &s)
     weekday = s.weekday; 
     saturday = s.saturday;
     sunday = s.sunday;
+
+    for (vector<ServicePeriodException>::const_iterator i = s.exceptions_on.begin();
+         i != s.exceptions_on.end(); i++)
+        add_exception_on(i->tm_mday, i->tm_mon, i->tm_year);
+
+    for (vector<ServicePeriodException>::const_iterator i = s.exceptions_off.begin();
+         i != s.exceptions_off.end(); i++)
+        add_exception_off(i->tm_mday, i->tm_mon, i->tm_year);
 }
 
 
@@ -88,9 +96,7 @@ ServicePeriod::ServicePeriod()
 
 ServicePeriod::ServicePeriod(FILE *fp)
 {
-    char _id[MAX_ID_LEN];
-    assert(fread(_id, 1, MAX_ID_LEN, fp) == MAX_ID_LEN);
-    id = _id;
+    assert(fread(&id, sizeof(int32_t), 1, fp) == 1);
 
     assert(fread(&start_time, sizeof(time_t), 1, fp) == 1);
     assert(fread(&end_time, sizeof(time_t), 1, fp) == 1);
@@ -122,9 +128,7 @@ ServicePeriod::ServicePeriod(FILE *fp)
 
 void ServicePeriod::write(FILE *fp)
 {
-    char spstr[MAX_ID_LEN];
-    strncpy(spstr, id.c_str(), MAX_ID_LEN);
-    assert(fwrite(spstr, sizeof(char), MAX_ID_LEN, fp) == MAX_ID_LEN);
+    assert(fwrite(&id, sizeof(int32_t), 1, fp) == 1);
 
     assert(fwrite(&start_time, sizeof(time_t), 1, fp) == 1);
     assert(fwrite(&end_time, sizeof(time_t), 1, fp) == 1);
@@ -138,13 +142,19 @@ void ServicePeriod::write(FILE *fp)
     assert(fwrite(&num_exceptions_on, sizeof(uint32_t), 1, fp) == 1);
     for (vector<ServicePeriodException>::iterator i = exceptions_on.begin();
          i != exceptions_on.end(); i++)
-        assert(fwrite(&(*i), sizeof(ServicePeriodException), 1, fp) == 1);
+    {
+        ServicePeriodException &e = (*i);
+        assert(fwrite(&e, sizeof(ServicePeriodException), 1, fp) == 1);
+    }
 
     uint32_t num_exceptions_off = exceptions_off.size();
     assert(fwrite(&num_exceptions_off, sizeof(uint32_t), 1, fp) == 1);
     for (vector<ServicePeriodException>::iterator i = exceptions_off.begin();
          i != exceptions_off.end(); i++)
-        assert(fwrite(&(*i), sizeof(ServicePeriodException), 1, fp) == 1);
+    {
+        ServicePeriodException &e = (*i);
+        assert(fwrite(&e, sizeof(ServicePeriodException), 1, fp) == 1);
+    }
 }
 
 

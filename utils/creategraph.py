@@ -10,12 +10,18 @@ from optparse import OptionParser
 class IdMap:
     '''class which maps from gtfs ids -> libroutez ids'''
     def __init__(self):
+        self.spmap = {}
         self.stopmap = {}
         self.routemap = {}
         self.tripmap = {}
 
     def save(self, fname):
         f = open(fname, 'w')
+
+        print >> f, "Service Periods: {"
+        for gtfs_sp_id in sorted(self.spmap.keys()):
+            print >>f, "    '%s': %s," % (gtfs_sp_id, self.spmap[gtfs_sp_id])
+        print >> f, "}"
         
         print >> f, "Stops: {"
         for gtfs_stop_id in sorted(self.stopmap.keys()):
@@ -41,6 +47,9 @@ def load_gtfs(tripgraph, sched, idmap):
         idmap.stopmap[stop.stop_id] = len(idmap.stopmap)
         tripgraph.add_tripstop(idmap.stopmap[stop.stop_id], TripStop.GTFS, 
                                stop.stop_lat, stop.stop_lon)
+
+    for sp_id in sched.service_periods.keys():
+        idmap.spmap[sp_id] = len(idmap.spmap)
 
     service_period_bounds = {}
       
@@ -71,12 +80,11 @@ def load_gtfs(tripgraph, sched, idmap):
                                 idmap.stopmap[stop.stop_id], 
                                 idmap.routemap[trip.route_id], 
                                 idmap.tripmap[trip.trip_id], 
-                                str(trip.service_id))
+                                idmap.spmap[trip.service_id])
         prevstop = stop
         prevsecs = secs
 
-    sp_ids = sched.service_periods.keys()
-    for sp_id in sp_ids:
+    for sp_id in sched.service_periods.keys():
         sp = sched.service_periods[sp_id]
         if not sp.start_date or not sp.end_date:
             continue
@@ -85,7 +93,7 @@ def load_gtfs(tripgraph, sched, idmap):
         # FIXME: currently assume weekday service is uniform, i.e. 
         # monday service == mon-fri service
         if service_period_bounds.has_key(sp_id):
-            s = ServicePeriod(str(sp_id), 
+            s = ServicePeriod(idmap.spmap[sp_id],
                               tm_start.tm_mday, tm_start.tm_mon - 1, 
                               (tm_start.tm_year - 1900),
                               tm_end.tm_mday, tm_end.tm_mon - 1, 
@@ -102,7 +110,7 @@ def load_gtfs(tripgraph, sched, idmap):
                     s.add_exception_off(tm_ex.tm_mday, tm_ex.tm_mon - 1,
                                         tm_ex.tm_year - 1900)
 
-            tripgraph.add_service_period(s) 
+            tripgraph.add_service_period(s)
         else:
             print "WARNING: It appears as if we have a service period with no "
             "bound. This implies that it's not actually being used for anything."

@@ -25,8 +25,8 @@ TripStop::TripStop(FILE *fp)
         assert(fread(&num_service_periods, sizeof(uint32_t), 1, fp) == 1);
         for (uint32_t i=0; i<num_service_periods; i++)
         {
-            char service_period[MAX_ID_LEN];
-            assert(fread(service_period, 1, MAX_ID_LEN, fp) == MAX_ID_LEN);
+            int32_t sp_id;
+            assert(fread(&sp_id, sizeof(int32_t), 1, fp) == 1);
 
             uint32_t num_route_ids;
             assert(fread(&num_route_ids, sizeof(uint32_t), 1, fp) == 1);
@@ -37,13 +37,13 @@ TripStop::TripStop(FILE *fp)
 
                 uint32_t num_triphops = 0;
                 assert(fread(&num_triphops, sizeof(uint32_t), 1, fp) == 1);
-                (*tdict)[service_period][route_id].reserve(num_triphops);
+                (*tdict)[sp_id][route_id].reserve(num_triphops);
                 for (uint32_t k=0; k<num_triphops; k++)
                 {
                     TripHop t;
                     assert(fread(&t, sizeof(TripHop), 1, fp) == 1);
                     assert(t.end_time >= t.start_time); // FIXME: should be >, no?
-                    (*tdict)[service_period][route_id].push_back(t);
+                    (*tdict)[sp_id][route_id].push_back(t);
                 }
             }
 
@@ -94,9 +94,7 @@ void TripStop::write(FILE *fp)
 
         for (ServiceDict::iterator i = tdict->begin(); i != tdict->end(); i++)
         {
-            char service_period[MAX_ID_LEN];
-            strncpy(service_period, i->first.c_str(), MAX_ID_LEN);
-            assert(fwrite(service_period, sizeof(char), MAX_ID_LEN, fp) == MAX_ID_LEN);
+            assert(fwrite(&(i->first), sizeof(int32_t), 1, fp) == 1);
             uint32_t num_route_ids = i->second.size();
             assert(fwrite(&num_route_ids, sizeof(uint32_t), 1, fp) == 1);
             for (TripHopDict::iterator j = i->second.begin();
@@ -133,7 +131,7 @@ static bool sort_triphops(const TripHop &x,
 
 void TripStop::add_triphop(int32_t start_time, int32_t end_time, 
                            int32_t dest_id, int32_t route_id, int32_t trip_id,
-                           string service_id)
+                           int32_t service_id)
 {
     if (!tdict)
         tdict = shared_ptr<ServiceDict>(new ServiceDict);
@@ -152,7 +150,7 @@ void TripStop::add_walkhop(int32_t dest_id, float walktime)
 
 
 const TripHop * TripStop::find_triphop(int time, int route_id, 
-                                       string service_id)
+                                       int32_t service_id)
 {
     if (tdict) 
     {
@@ -169,7 +167,7 @@ const TripHop * TripStop::find_triphop(int time, int route_id,
 
 
 vector<TripHop> TripStop::find_triphops(int time, int route_id,
-                                        string service_id, 
+                                        int32_t service_id,
                                         int num)
 {
     vector<TripHop> tlist;
@@ -189,7 +187,7 @@ vector<TripHop> TripStop::find_triphops(int time, int route_id,
 }
 
 
-list<int> TripStop::get_routes(std::string service_id)
+list<int> TripStop::get_routes(int32_t service_id)
 {
     list<int> routes;
 

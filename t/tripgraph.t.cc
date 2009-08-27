@@ -28,9 +28,9 @@ WVTEST_MAIN("basic_graph_pathfinding")
 
     // take the triphop if we have it
     {
-        ServicePeriod s("all", 0, 0, 0, 7, 0, 100, 2000, true, true, true);
+        ServicePeriod s(0, 0, 0, 0, 7, 0, 100, 2000, true, true, true);
         g.add_service_period(s);
-        g.add_triphop(500, 1000, 0, 1, 1, 1, "all");
+        g.add_triphop(500, 1000, 0, 1, 1, 1, 0);
     }
 
     {
@@ -57,9 +57,9 @@ WVTEST_MAIN("basic_graph_saveload")
     g.add_tripstop(1, TripStop::OSM, 1.0f, 0.0f);
     g.add_walkhop(0, 1);
 
-    ServicePeriod s("all", 1, 0, 0, 7, 0, 100, 2000, true, true, true);
+    ServicePeriod s(0, 1, 0, 0, 7, 0, 100, 2000, true, true, true);
     g.add_service_period(s);
-    g.add_triphop(500, 1000, 0, 1, 1, 1, "all");
+    g.add_triphop(500, 1000, 0, 1, 1, 1, 0);
 
     char *tmpgraphname = tmpnam(NULL); // security issues in unit tests? bah.
     unlink(tmpgraphname);
@@ -152,40 +152,41 @@ WVTEST_MAIN("service_periods")
 
     // from the 1st to the 7th (i.e. 1st saturday only)
     {
-        ServicePeriod s("saturday_2008", 1, 0, 108, 7, 0, 108, 2000, false, true, false);
+        ServicePeriod s(0, 1, 0, 108, 7, 0, 108, 2000, false, true, false);
         g.add_service_period(s);
     }
 
     // test something that's within a supported service period
     // Saturday Midnight Jan 5th 2008
     {
-        vector<pair<string, int> > vsp = g.get_service_period_ids_for_time(get_time_t(5, 0, 108));
+        vector<pair<int, int> > vsp = g.get_service_period_ids_for_time(get_time_t(5, 0, 108));
         WVPASSEQ(vsp.size(), 1);
-        WVPASSEQ(vsp[0].first, string("saturday_2008"));
-    }    
+        WVPASSEQ(vsp[0].first, 0);
+    }
+
     // test something outside a supported service period: day
     // Saturday Midnight Jan 11th 2008
     {
-        vector<pair<string, int> > vsp = g.get_service_period_ids_for_time(get_time_t(11, 0, 108));
+        vector<pair<int, int> > vsp = g.get_service_period_ids_for_time(get_time_t(11, 0, 108));
         WVPASSEQ(vsp.size(), 0);
     }
     // test something outside a supported service period: month
     // Saturday Midnight Feb 5th 2008
     {
-        vector<pair<string, int> > vsp = g.get_service_period_ids_for_time(get_time_t(5, 1, 108));
+        vector<pair<int, int> > vsp = g.get_service_period_ids_for_time(get_time_t(5, 1, 108));
         WVPASSEQ(vsp.size(), 0);
     }
 
     // test something outside a supported service period: year
     // Saturday Midnight Jan 11th 2009
     {
-        vector<pair<string, int> > vsp = g.get_service_period_ids_for_time(get_time_t(5, 1, 109));
+        vector<pair<int, int> > vsp = g.get_service_period_ids_for_time(get_time_t(5, 1, 109));
         WVPASSEQ(vsp.size(), 0);
     }
 
     // add another service period (saturdays for month of january)
     {
-        ServicePeriod s("saturday_jan_2008", 1, 0, 108, 31, 0, 108, 2000, false, true, 
+        ServicePeriod s(1, 1, 0, 108, 31, 0, 108, 2000, false, true,
                         false);
         g.add_service_period(s);
     }
@@ -193,10 +194,10 @@ WVTEST_MAIN("service_periods")
     // test something that's within _two_ supported service periods
     // Saturday Midnight Jan 5th 2008
     {
-        vector<pair<string, int> > vsp = g.get_service_period_ids_for_time(get_time_t(5, 0, 108));
+        vector<pair<int, int> > vsp = g.get_service_period_ids_for_time(get_time_t(5, 0, 108));
         WVPASSEQ(vsp.size(), 2);
-        WVPASS(vsp[0].first==string("saturday_2008") || vsp[0].first==string("saturday_jan_2008"));
-        WVPASS(vsp[1].first==string("saturday_2008") || vsp[1].first==string("saturday_jan_2008"));
+        WVPASS(vsp[0].first==0 || vsp[0].first==1);
+        WVPASS(vsp[1].first==0 || vsp[1].first==1);
         WVFAILEQ(vsp[0].first, vsp[1].first);
     }    
 
@@ -209,20 +210,21 @@ WVTEST_MAIN("service_periods_overlapping")
     TripGraph g;
 
     // from the 1st to the 7th (i.e. 1st saturday only)
+    // (weekday and saturday schedules)
     {
-        ServicePeriod s1("saturday_2008", 1, 0, 108, 7, 0, 108, 90000, false, true, false);
+        ServicePeriod s1(0, 1, 0, 108, 7, 0, 108, 90000, false, true, false);
         g.add_service_period(s1);
-        ServicePeriod s2("weekday_2008", 1, 0, 108, 7, 0, 108, 90000, true, false, false);
+        ServicePeriod s2(1, 1, 0, 108, 7, 0, 108, 90000, true, false, false);
         g.add_service_period(s2);
     }
 
-    vector<pair<string, int> > vsp = g.get_service_period_ids_for_time(get_time_t(5, 0, 108));
+    vector<pair<int, int> > vsp = g.get_service_period_ids_for_time(get_time_t(5, 0, 108));
     WVPASSEQ(vsp.size(), 2);
-    WVPASS(vsp[0].first==string("saturday_2008") || vsp[0].first==string("weekday_2008"));
-    WVPASS(vsp[1].first==string("saturday_2008") || vsp[1].first==string("weekday_2008"));
+    WVPASS(vsp[0].first==0 || vsp[0].first==1);
+    WVPASS(vsp[1].first==0 || vsp[1].first==1);
     WVFAILEQ(vsp[0].first, vsp[1].first);
     
-    int weekday_index = (vsp[0].first == string("weekday_2008")) ? 0 : 1;
+    int weekday_index = (vsp[0].first == 1) ? 0 : 1;
     WVPASSEQ(vsp[weekday_index].second, 86400);
 }
 
@@ -235,12 +237,12 @@ WVTEST_MAIN("service_periods_turned_on_or_off")
     // turn off weekday service on the 2nd (wednesday)
     // turn on saturday service on the 3rd (keeping weekday service)
     {
-        ServicePeriod s1("saturday_2008", 1, 0, 108, 7, 0, 108, 80000, false, true, false);
+        ServicePeriod s1(0, 1, 0, 108, 7, 0, 108, 80000, false, true, false);
         s1.add_exception_on(3, 0, 108);
         WVPASSEQ(s1.is_turned_on(3, 0, 108), true);
         WVPASSEQ(s1.is_turned_on(4, 0, 108), false);
         g.add_service_period(s1);
-        ServicePeriod s2("weekday_2008", 1, 0, 108, 7, 0, 108, 80000, true, false, false);
+        ServicePeriod s2(1, 1, 0, 108, 7, 0, 108, 80000, true, false, false);
         s2.add_exception_off(2, 0, 108);
         WVPASSEQ(s2.is_turned_off(2, 0, 108), true);
         WVPASSEQ(s2.is_turned_off(3, 0, 108), false);
@@ -249,16 +251,16 @@ WVTEST_MAIN("service_periods_turned_on_or_off")
 
     {    
         // should be no service on the 2nd
-        vector<pair<string, int> > vsp = g.get_service_period_ids_for_time(get_time_t(2, 0, 108));
+        vector<pair<int, int> > vsp = g.get_service_period_ids_for_time(get_time_t(2, 0, 108));
         WVPASSEQ(vsp.size(), 0);
     }
 
     {
         // should be two service periods on the 3rd (saturday and weekday)
-        vector<pair<string, int> > vsp = g.get_service_period_ids_for_time(get_time_t(3, 0, 108));
+        vector<pair<int, int> > vsp = g.get_service_period_ids_for_time(get_time_t(3, 0, 108));
         WVPASSEQ(vsp.size(), 2);
-        WVPASS(vsp[0].first==string("saturday_2008") || vsp[0].first==string("weekday_2008"));
-        WVPASS(vsp[1].first==string("saturday_2008") || vsp[1].first==string("weekday_2008"));
+        WVPASS(vsp[0].first==0 || vsp[0].first==1);
+        WVPASS(vsp[1].first==0 || vsp[1].first==1);
         WVFAILEQ(vsp[0].first, vsp[1].first);
     }    
 }
@@ -275,10 +277,10 @@ WVTEST_MAIN("service_periods_save_load")
     // turn off weekday service on the 2nd (wednesday)
     // turn on saturday service on the 3rd (keeping weekday service)
     {
-        ServicePeriod s1("saturday_2008", 1, 0, 108, 7, 0, 108, 80000, false, true, false);
+        ServicePeriod s1(0, 1, 0, 108, 7, 0, 108, 80000, false, true, false);
         s1.add_exception_on(3, 0, 108);
         g.add_service_period(s1);
-        ServicePeriod s2("weekday_2008", 1, 0, 108, 7, 0, 108, 80000, true, false, false);
+        ServicePeriod s2(1, 1, 0, 108, 7, 0, 108, 80000, true, false, false);
         s2.add_exception_off(2, 0, 108);
         g.add_service_period(s2);
     }
@@ -292,16 +294,16 @@ WVTEST_MAIN("service_periods_save_load")
 
     {    
         // should be no service on the 2nd
-        vector<pair<string, int> > vsp = g2.get_service_period_ids_for_time(get_time_t(2, 0, 108));
+        vector<pair<int, int> > vsp = g2.get_service_period_ids_for_time(get_time_t(2, 0, 108));
         WVPASSEQ(vsp.size(), 0);
     }
 
     {
         // should be two service periods on the 3rd (saturday and weekday)
-        vector<pair<string, int> > vsp = g2.get_service_period_ids_for_time(get_time_t(3, 0, 108));
+        vector<pair<int, int> > vsp = g2.get_service_period_ids_for_time(get_time_t(3, 0, 108));
         WVPASSEQ(vsp.size(), 2);
-        WVPASS(vsp[0].first==string("saturday_2008") || vsp[0].first==string("weekday_2008"));
-        WVPASS(vsp[1].first==string("saturday_2008") || vsp[1].first==string("weekday_2008"));
+        WVPASS(vsp[0].first==0 || vsp[0].first==1);
+        WVPASS(vsp[1].first==0 || vsp[1].first==1);
         WVFAILEQ(vsp[0].first, vsp[1].first);
     }    
 }
