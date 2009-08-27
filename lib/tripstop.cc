@@ -13,13 +13,14 @@ TripStop::TripStop(FILE *fp)
     assert(fread(&type, sizeof(Type), 1, fp) == 1);
     assert(fread(&lat, sizeof(float), 1, fp) == 1);
     assert(fread(&lng, sizeof(float), 1, fp) == 1);
-        
+    tdict = NULL;
+
     uint8_t have_triphops;
     assert(fread(&have_triphops, sizeof(uint8_t), 1, fp) == 1);
 
     if (have_triphops)
     {
-        tdict = shared_ptr<ServiceDict>(new ServiceDict);
+        tdict = new ServiceDict;
 
         uint32_t num_service_periods;
         assert(fread(&num_service_periods, sizeof(uint32_t), 1, fp) == 1);
@@ -70,9 +71,13 @@ TripStop::TripStop(int32_t _id, Type _type, float _lat, float _lng)
     type = _type;
     lat = _lat;
     lng = _lng;
+    tdict = NULL;
+}
 
-    // assume that we do want to a tdict if we're allocating a new tripstop
-    tdict = shared_ptr<ServiceDict>(new ServiceDict);
+
+TripStop::TripStop()
+{
+    tdict = NULL;
 }
 
 
@@ -82,7 +87,6 @@ void TripStop::write(FILE *fp)
     assert(fwrite(&type, sizeof(Type), 1, fp) == 1);
     assert(fwrite(&lat, sizeof(float), 1, fp) == 1);
     assert(fwrite(&lng, sizeof(float), 1, fp) == 1);
-
     
     uint8_t have_triphops = tdict ? 1 : 0;
     assert(fwrite(&have_triphops, sizeof(uint8_t), 1, fp) == 1);
@@ -122,6 +126,12 @@ void TripStop::write(FILE *fp)
 }
 
 
+TripStop::~TripStop()
+{
+    delete tdict;
+}
+
+
 static bool sort_triphops(const TripHop &x, 
                           const TripHop &y)
 {
@@ -134,7 +144,7 @@ void TripStop::add_triphop(int32_t start_time, int32_t end_time,
                            int32_t service_id)
 {
     if (!tdict)
-        tdict = shared_ptr<ServiceDict>(new ServiceDict);
+        tdict = new ServiceDict;
     
     (*tdict)[service_id][route_id].push_back(TripHop(start_time, end_time, 
                                                      dest_id, trip_id));
