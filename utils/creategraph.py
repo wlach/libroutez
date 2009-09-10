@@ -120,20 +120,19 @@ def load_osm(tripgraph, map, idmap):
     # map of osm ids -> libroutez ids. libroutez ids are positive integers, 
     # starting from the last gtfs id. I'm assuming that OSM ids can be pretty 
     # much anything
+    osm_nodemap = {}
     for node in map.nodes.values():
-        osmid = "osm" + node.id
-        idmap.stopmap[osmid] = len(idmap.stopmap)
-        tripgraph.add_tripstop(idmap.stopmap[osmid], TripStop.OSM,
+        osm_nodemap[node.id] = len(osm_nodemap) + len(idmap.stopmap)
+        tripgraph.add_tripstop(osm_nodemap[node.id], TripStop.OSM,
                                node.lat, node.lon)
         
     for way in map.ways.values():
         previd = None
         for id in way.nds:
-            osmid = "osm" + id
             if previd:
-                tripgraph.add_walkhop(idmap.stopmap[previd], idmap.stopmap[osmid])
-                tripgraph.add_walkhop(idmap.stopmap[osmid], idmap.stopmap[previd])
-            previd = osmid
+                tripgraph.add_walkhop(osm_nodemap[previd], osm_nodemap[id])
+                tripgraph.add_walkhop(osm_nodemap[id], osm_nodemap[previd])
+            previd = id
 
 if __name__ == '__main__':
 
