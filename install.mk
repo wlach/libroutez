@@ -21,4 +21,4 @@ install-util:
 	$(INSTALL) utils/creategraph.py $(DESTDIR)$(bindir)
 
 
-install: install-libroutez install-python install-util
+install: install-libroutez install-python install-util install-ruby
