@@ -5,17 +5,20 @@
 
 # FIXME: flesh this out a bit more
 
-import libroutez.tripgraph
+from libroutez.tripgraph import *
+
 
 if __name__ == '__main__':
-    g = libroutez.tripgraph.TripGraph()
+    g = TripGraph()
 
-    g.add_tripstop("gtfs1", "gtfs", 0.0, 0.0)
-    g.add_tripstop("gtfs2", "gtfs", 0.5, 0.0)
-    g.add_triphop(500, 1, "gtfs1", "gtfs2", 1, "caturday")
-    g.add_walkhop("gtfs1", "gtfs2")
+    g.add_tripstop(0, TripStop.GTFS, 0.0, 0.0)
+    g.add_tripstop(1, TripStop.GTFS, 0.5, 0.0)
+    s = ServicePeriod(0, 1, 0, 0, 7, 0, 100, 2000, True, True, True)
+    g.add_service_period(s);
+    g.add_triphop(500, 1000, 0, 1, 1, 1, 0)
+    g.add_walkhop(0, 1)
 
-    path = g.find_path(0, "caturday", False, 0.0, 0.0, 0.5, 0.0)
+    path = g.find_path(0, False, 0.0, 0.0, 0.5, 0.0)
 
     for action in path.get_actions():
         print "src: %s dest: %s st: %s et: %s rid: %s" % \
