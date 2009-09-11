@@ -113,10 +113,10 @@ http://geobase.ca/geobase/en/licence.jsp
 
 Now that you've built a graph, you can start planning trips. Try the
 'testgraph' mini program in examples. The following corresponds to
-a trip from Cogswell and Maynard to Glengarry Gardens at 9am on a weekday in 
-Halifax, Nova Scotia, Canada:
+a trip from Cogswell and Maynard to Glengarry Gardens at 9am on Monday,
+September 14th 2009 in Halifax, Nova Scotia, Canada:
 
-"testgraph mygraph.routez 44.649942 -63.583457 44.6605 -63.7467 32400 weekday"
+"testgraph mygraph.routez 44.649942 -63.583457 44.6605 -63.7467 1252933200"
 
 You should get a bunch of directions in "routezspeak" in response. :) Note that
 no attempt is currently made to prettify the output, but hopefully this will at
