@@ -56,7 +56,6 @@ struct TripStop
     TripStop(FILE *fp);
     TripStop(int32_t _id, Type _type, float _lat, float _lng);
     TripStop();
-    ~TripStop();
 
     void write(FILE *fp);
 
@@ -73,9 +72,12 @@ struct TripStop
     typedef boost::unordered_map<int32_t, TripHopDict> ServiceDict;
     typedef boost::unordered_map<int32_t, float> WalkHopDict;
 
-    // we keep a pointer to a tdict, tas most nodes won't have one and we
-    // don't want the memory overhead of one if not strictly needed
-    ServiceDict * tdict;
+    // we keep a shared pointer to a tdict, as most nodes won't have one and
+    // we don't want the memory overhead of one if not strictly needed
+    // (note: we use a shared pointer instead of a standard pointer because
+    // the same tripstop may have multiple instances, but we only want one
+    // instance of its internal servicedict because it can be really huge...)
+    boost::shared_ptr<ServiceDict> tdict;
 
     typedef std::list<WalkHop> WalkHopList;
     WalkHopList wlist;

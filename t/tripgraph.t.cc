@@ -71,7 +71,7 @@ WVTEST_MAIN("basic_graph_saveload")
     // verify that we have two tripstops
     for (int i=0; i<2; i++) 
     {
-        TripStop ts = g2.get_tripstop(1);
+        TripStop ts = g2.get_tripstop(i);
         WVPASSEQ(ts.type, TripStop::OSM);
     }
 

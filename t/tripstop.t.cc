@@ -24,7 +24,7 @@ WVTEST_MAIN("save/load")
     WVPASSEQ(t2.type, t1.type);
     WVPASSEQ(t2.lat, t1.lat);
     WVPASSEQ(t2.lng, t1.lng);
-    TripStop::ServiceDict *tdict = t2.tdict;
+    shared_ptr<TripStop::ServiceDict> tdict = t2.tdict;
     WVPASSEQ(tdict->size(), 1);
     WVPASSEQ(((*tdict))[0].size(), 1);
     WVPASSEQ(((*tdict))[0][0].size(), 2);
