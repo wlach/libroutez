@@ -22,7 +22,7 @@ path.get_actions().each do |action|
   puts "src: #{action.src_id} dest: #{action.dest_id} st: #{action.start_time} et: #{action.end_time} rid: #{action.route_id}" 
 end
 
-s = Routez::ServicePeriod.new(0, 1, 0, 0, 7, 0, 100, 2000, true, true, true);
+s = Routez::ServicePeriod.new(0, 1, 0, 0, 7, 0, 100, 2000, true, true, true)
 g.add_service_period(s);
 g.add_triphop(500, 1000, 0, 1, 1, 1, 0)
 path2 = g.find_path(0, false, 0.0, 0.0, 1.0, 0.0)
