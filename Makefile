@@ -65,7 +65,7 @@ t/all.t: $(TEST_OBJS) $(WVTEST_OBJS) libroutez.so
 test: test-cpp test-python
 
 test-cpp: t/all.t
-	LD_LIBRARY_PATH=$(PWD) valgrind --tool=memcheck --suppressions=t/boost.supp wvtest/wvtestrun t/all.t
+	LD_LIBRARY_PATH=$(PWD) valgrind --tool=memcheck wvtest/wvtestrun t/all.t
 
 test-python: python/libroutez/tripgraph.py python/libroutez/_tripgraph.so
 	LD_LIBRARY_PATH=$(PWD) PYTHONPATH=$(PWD)/t:$(PWD)/python:$(PYTHONPATH) wvtest/wvtestrun python wvtest/python/wvtestmain.py pytest.py
