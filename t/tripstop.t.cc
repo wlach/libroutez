@@ -2,7 +2,7 @@
 #include "tripstop.h"
 
 using namespace std;
-using namespace boost;
+using namespace tr1;
 
 
 WVTEST_MAIN("save/load")

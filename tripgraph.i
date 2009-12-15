@@ -8,12 +8,12 @@
 %}
 
 %include "std_string.i"
-%include "std_list.i"
+%include "std_deque.i"
 %include "std_vector.i"
 %include "std_pair.i"
 %include "inttypes.i"
-%template(ListTripAction) std::list<TripAction>;
-%template(ListId) std::list<int>;
+%template(ListTripAction) std::deque<TripAction>;
+%template(ListId) std::deque<int>;
 %template(ListTripHop) std::vector<TripHop>;
 %template(ListTripStop) std::vector<TripStop>;
 %template(ServicePeriodTuple) std::pair<int, int>;

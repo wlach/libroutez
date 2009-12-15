@@ -16,7 +16,7 @@ WVTEST_MAIN("basic_graph_pathfinding")
     {
         TripPath *p = g.find_path(0, false, 0.0, 0.0, 1.0, 0.0);
         
-        std::list<TripAction> actions = p->get_actions();
+        std::deque<TripAction> actions = p->get_actions();
         WVPASSEQ(actions.size(), 1);
         
         TripAction action = actions.front();
@@ -36,7 +36,7 @@ WVTEST_MAIN("basic_graph_pathfinding")
     {
         TripPath *p = g.find_path(0, false, 0.0, 0.0, 1.0, 0.0);
         
-        std::list<TripAction> actions = p->get_actions();
+        std::deque<TripAction> actions = p->get_actions();
         WVPASSEQ(actions.size(), 1);
         
         TripAction action = actions.front();
@@ -79,7 +79,7 @@ WVTEST_MAIN("basic_graph_saveload")
     {
         TripPath *p = g.find_path(0, false, 0.0, 0.0, 1.0, 0.0);
         
-        std::list<TripAction> actions = p->get_actions();
+        std::deque<TripAction> actions = p->get_actions();
         WVPASSEQ(actions.size(), 1);
 
         TripAction action = actions.front();

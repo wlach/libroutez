@@ -8,7 +8,7 @@
 #endif
 
 using namespace std;
-using namespace boost;
+using namespace tr1;
 
 static inline double radians(double degrees)
 {
@@ -141,7 +141,7 @@ void TripPath::_get_heuristic_weight()
         heuristic_weight += (5*60);
 }
 
-static void _add_actions_to_list(list<TripAction> &l, 
+static void _add_actions_to_list(deque<TripAction> &l, 
                                  shared_ptr<TripAction> &action)
 {
     if (action)
@@ -152,9 +152,9 @@ static void _add_actions_to_list(list<TripAction> &l,
     }            
 }
 
-list<TripAction> TripPath::get_actions()
+deque<TripAction> TripPath::get_actions()
 {
-    list<TripAction> l;
+    deque<TripAction> l;
 
     // recursively add actions to list, so we get them back in the
     // correct order
@@ -164,7 +164,7 @@ list<TripAction> TripPath::get_actions()
 }
 
 shared_ptr<TripPath> TripPath::add_action(shared_ptr<TripAction> &action, 
-                            list<int> &_possible_route_ids,
+                            deque<int> &_possible_route_ids,
                             shared_ptr<TripStop> &_last_stop)
 {
     shared_ptr<TripPath> new_trippath(new TripPath(*this));
@@ -194,7 +194,7 @@ shared_ptr<TripPath> TripPath::add_action(shared_ptr<TripAction> &action,
         }
     }
 
-    for (list<int>::iterator i = _possible_route_ids.begin(); 
+    for (deque<int>::iterator i = _possible_route_ids.begin(); 
          i != _possible_route_ids.end(); i++)
     {
         new_trippath->possible_route_ids.insert(*i);

@@ -3,8 +3,8 @@
 #include <queue>
 #include <stdint.h>
 #include <string>
-#include <boost/shared_ptr.hpp>
-#include <boost/unordered_map.hpp>
+#include <tr1/memory>
+#include <tr1/unordered_map>
 #include <vector>
 
 #include "serviceperiod.h"
@@ -41,20 +41,20 @@ class TripGraph
     // various internal types
     struct PathCompare
     {
-        inline bool operator() (const boost::shared_ptr<TripPath> &x, 
-                                const boost::shared_ptr<TripPath> &y)
+        inline bool operator() (const std::tr1::shared_ptr<TripPath> &x, 
+                                const std::tr1::shared_ptr<TripPath> &y)
         {
             return x->heuristic_weight > y->heuristic_weight;
         }
     };
 
-    typedef std::vector<boost::shared_ptr<TripPath> > TripPathList;
-    typedef boost::unordered_map<int32_t, boost::unordered_map<int, boost::shared_ptr<TripPath> > > VisitedRouteMap;
-    typedef boost::unordered_map<int32_t, boost::unordered_map<int32_t, boost::shared_ptr<TripPath> > > VisitedWalkMap;
-    typedef std::priority_queue<boost::shared_ptr<TripPath>, std::vector<boost::shared_ptr<TripPath> >, PathCompare> PathQueue;
+    typedef std::vector<std::tr1::shared_ptr<TripPath> > TripPathList;
+    typedef std::tr1::unordered_map<int32_t, std::tr1::unordered_map<int, std::tr1::shared_ptr<TripPath> > > VisitedRouteMap;
+    typedef std::tr1::unordered_map<int32_t, std::tr1::unordered_map<int32_t, std::tr1::shared_ptr<TripPath> > > VisitedWalkMap;
+    typedef std::priority_queue<std::tr1::shared_ptr<TripPath>, std::vector<std::tr1::shared_ptr<TripPath> >, PathCompare> PathQueue;
     
     typedef std::vector<ServicePeriod> ServicePeriodList;
-    typedef std::vector<boost::shared_ptr<TripStop> > TripStopList;
+    typedef std::vector<std::tr1::shared_ptr<TripStop> > TripStopList;
 
     std::vector<TripStop> find_tripstops_in_range(double lat, double lng, 
                                                   TripStop::Type type,
@@ -63,10 +63,10 @@ class TripGraph
   private:
     // internal copy of get_tripstop: returns a pointer, not a copy, so
     // much faster (when called many times)
-    boost::shared_ptr<TripStop> _get_tripstop(int32_t id);
-    boost::shared_ptr<TripStop> get_nearest_stop(double lat, double lng);
+    std::tr1::shared_ptr<TripStop> _get_tripstop(int32_t id);
+    std::tr1::shared_ptr<TripStop> get_nearest_stop(double lat, double lng);
 
-    void extend_path(boost::shared_ptr<TripPath> &path, 
+    void extend_path(std::tr1::shared_ptr<TripPath> &path, 
                      bool walkonly, int32_t end_id, int &num_paths_considered,
                      VisitedRouteMap &visited_routes, 
                      VisitedWalkMap &visited_walks, 

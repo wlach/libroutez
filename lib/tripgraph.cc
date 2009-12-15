@@ -5,7 +5,7 @@
 #include <math.h>
 
 using namespace std;
-using namespace boost;
+using namespace tr1;
 
 // set to 1 to see what find_path is doing (VERY verbose)
 #if 0
@@ -471,13 +471,13 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
 
     // Keep track of outgoing route ids at this node: make sure that we 
     // don't get on a route later when we could have gotten on here.
-    list<int> outgoing_route_ids;
+    deque<int> outgoing_route_ids;
     if (!walkonly)
     {
         for (vector<pair<int, int> >::iterator i = vsp.begin(); i != vsp.end(); i++)
         {
-            list<int> route_ids = src_stop->get_routes(i->first); 
-            for (list<int>::iterator j = route_ids.begin(); j != route_ids.end(); j++) 
+            deque<int> route_ids = src_stop->get_routes(i->first); 
+            for (deque<int>::iterator j = route_ids.begin(); j != route_ids.end(); j++) 
                 outgoing_route_ids.push_back(*j);
         }
     }
@@ -538,8 +538,8 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
     for (vector<pair<int, int> >::iterator sp = vsp.begin(); sp != vsp.end();
          sp++)
     {
-        list<int> route_ids = src_stop->get_routes(sp->first);
-        for (list<int>::iterator j = route_ids.begin(); j != route_ids.end(); j++)
+        deque<int> route_ids = src_stop->get_routes(sp->first);
+        for (deque<int>::iterator j = route_ids.begin(); j != route_ids.end(); j++)
         {
             int LEEWAY = 0;
             if ((*j) != last_route_id)

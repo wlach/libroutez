@@ -1,13 +1,13 @@
 #ifndef __TRIPSTOP_H
 #define __TRIPSTOP_H
 #include <assert.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/unordered_map.hpp>
+#include <tr1/memory>
+#include <tr1/unordered_map>
 #include <string.h>
 #include <string>
 #include <stdint.h>
 #include <vector>
-#include <list>
+#include <deque>
 
 
 // a triphop represents a hop to a specific node on the graph at a 
@@ -62,24 +62,24 @@ struct TripStop
     void add_triphop(int32_t start_time, int32_t end_time, int32_t dest_id, 
                      int32_t route_id, int32_t trip_id, int32_t service_id);
     void add_walkhop(int32_t dest_id, float walktime);
-    std::list<int> get_routes(int32_t service_id);
+    std::deque<int> get_routes(int32_t service_id);
     const TripHop * find_triphop(int time, int route_id, int32_t service_id);
     std::vector<TripHop> find_triphops(
         int time, int route_id, int32_t service_id, int num);
 
     typedef std::vector<TripHop> TripHopList;
-    typedef boost::unordered_map<int, TripHopList> TripHopDict;
-    typedef boost::unordered_map<int32_t, TripHopDict> ServiceDict;
-    typedef boost::unordered_map<int32_t, float> WalkHopDict;
+    typedef std::tr1::unordered_map<int, TripHopList> TripHopDict;
+    typedef std::tr1::unordered_map<int32_t, TripHopDict> ServiceDict;
+    typedef std::tr1::unordered_map<int32_t, float> WalkHopDict;
 
     // we keep a shared pointer to a tdict, as most nodes won't have one and
     // we don't want the memory overhead of one if not strictly needed
     // (note: we use a shared pointer instead of a standard pointer because
     // the same tripstop may have multiple instances, but we only want one
     // instance of its internal servicedict because it can be really huge...)
-    boost::shared_ptr<ServiceDict> tdict;
+    std::tr1::shared_ptr<ServiceDict> tdict;
 
-    typedef std::list<WalkHop> WalkHopList;
+    typedef std::deque<WalkHop> WalkHopList;
     WalkHopList wlist;
 };
 

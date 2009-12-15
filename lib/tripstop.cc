@@ -4,7 +4,7 @@
 
 
 using namespace std;
-using namespace boost;
+using namespace tr1;
 
 
 TripStop::TripStop(FILE *fp) 
@@ -188,9 +188,9 @@ vector<TripHop> TripStop::find_triphops(int time, int route_id,
 }
 
 
-list<int> TripStop::get_routes(int32_t service_id)
+deque<int> TripStop::get_routes(int32_t service_id)
 {
-    list<int> routes;
+    deque<int> routes;
 
     if (tdict) 
     {
