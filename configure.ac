@@ -31,7 +31,7 @@ esac
 
 AC_SUBST(OS)
 
-AX_PYTHON
+AX_PYTHON_DEVEL
 AX_WITH_RUBY
 AX_RUBY_DEVEL
 
@@ -41,8 +41,12 @@ if test x"$SWIG" = "x"; then
     AC_MSG_ERROR("swig not found")
 fi
 
-if test x"$PYTHON_LIB" = "x"; then
+if test x"$PYTHON_CPPFLAGS" = "x"; then
     AC_MSG_ERROR("python not found")
+fi
+
+if test x"$RUBY_CPPFLAGS" = "x"; then
+    AC_MSG_ERROR("ruby not found")
 fi
 
 AC_CONFIG_FILES(config.mk)

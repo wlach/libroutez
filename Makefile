@@ -8,7 +8,7 @@ include install.mk
 
 # Always always compile with fPIC
 CFLAGS += -fPIC
-CXXFLAGS += -fPIC -I/usr/include/python2.6 -I/usr/lib/ruby/1.8/i486-linux
+CXXFLAGS += -fPIC
 
 # libroutez should be compiled as a shared library by default
 ifeq (${OS},MACOS)
