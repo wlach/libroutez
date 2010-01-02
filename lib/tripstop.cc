@@ -1,6 +1,7 @@
+#include "defuns.h"
 #include "tripstop.h"
 #include <algorithm>
-#include "defuns.h"
+#include <stdio.h>
 
 
 using namespace std;

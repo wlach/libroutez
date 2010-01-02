@@ -1,5 +1,6 @@
 #include "wvtest.h"
 #include "tripstop.h"
+#include <stdio.h>
 
 using namespace std;
 using namespace tr1;
