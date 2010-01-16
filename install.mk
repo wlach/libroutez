@@ -19,6 +19,7 @@ install-ruby:
 install-util:
 	$(INSTALL) -d $(DESTDIR)$(bindir)
 	$(INSTALL) utils/creategraph.py $(DESTDIR)$(bindir)
+	$(INSTALL) utils/get-gtfs-bounds.py $(DESTDIR)$(bindir)
 
 
 install: install-libroutez install-python install-util install-ruby
