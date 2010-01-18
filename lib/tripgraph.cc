@@ -457,7 +457,9 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
                                last_route_id);
     }
 #endif
-    double elapsed_daysecs = (uint64_t)path->time % SECS_IN_DAY;
+    time_t mysecs = (time_t)path->time;
+    struct tm * tm = localtime(&mysecs);
+    double elapsed_daysecs = tm->tm_sec + (60*tm->tm_min) + (60*60*tm->tm_hour);
     double daystart = path->time - elapsed_daysecs;
 
     // Figure out service period based on start time, then figure out
