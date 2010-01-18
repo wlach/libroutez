@@ -42,6 +42,9 @@ class IdMap:
         f.close()
 
 def load_gtfs(tripgraph, sched, idmap):
+    print "Setting timezone to %s" % sched.GetDefaultAgency().agency_timezone
+    tripgraph.set_timezone(str(sched.GetDefaultAgency().agency_timezone))
+
     stops = sched.GetStopList()
     for stop in stops:
         idmap.stopmap[stop.stop_id] = len(idmap.stopmap)

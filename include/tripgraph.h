@@ -17,8 +17,9 @@ class TripGraph
   public:
     TripGraph();
     void load(std::string fname);
-    void save(std::string fname);
+    void save(std::string fname);    
 
+    void set_timezone(std::string timezone);
     void add_service_period(ServicePeriod &service_period);
     void add_triphop(int32_t start_time, int32_t end_time, int32_t src_id, 
                      int32_t dest_id, int32_t route_id, int32_t trip_id,
@@ -72,6 +73,7 @@ class TripGraph
                      VisitedWalkMap &visited_walks, 
                      PathQueue &uncompleted_paths, PathQueue &completed_paths);
     
+    std::string timezone;
     TripStopList tripstops;
     ServicePeriodList splist;
 };
