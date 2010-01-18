@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <vector>
 #include <deque>
+#include <list>
 
 
 // a triphop represents a hop to a specific node on the graph at a 
@@ -70,7 +71,6 @@ struct TripStop
     typedef std::vector<TripHop> TripHopList;
     typedef std::tr1::unordered_map<int, TripHopList> TripHopDict;
     typedef std::tr1::unordered_map<int32_t, TripHopDict> ServiceDict;
-    typedef std::tr1::unordered_map<int32_t, float> WalkHopDict;
 
     // we keep a shared pointer to a tdict, as most nodes won't have one and
     // we don't want the memory overhead of one if not strictly needed
@@ -79,7 +79,7 @@ struct TripStop
     // instance of its internal servicedict because it can be really huge...)
     std::tr1::shared_ptr<ServiceDict> tdict;
 
-    typedef std::deque<WalkHop> WalkHopList;
+    typedef std::list<WalkHop> WalkHopList;
     WalkHopList wlist;
 };
 
