@@ -1,6 +1,6 @@
 include config.mk
 
-default:  libroutez.so examples/testgraph \
+default:  libroutez.so examples/loadgraph examples/testgraph \
 	python/libroutez/tripgraph.py python/libroutez/_tripgraph.so \
 	ruby/routez.so
 
