@@ -402,7 +402,7 @@ TripPath * TripGraph::find_path(double start, bool walkonly,
                                       start_node->lat, start_node->lng);
     start += (dist_from_start / EST_WALK_SPEED);
 
-    DEBUGPATH("- Start time - %d\n", start);
+    DEBUGPATH("- Start time - %f (dist from start: %f)\n", start, dist_from_start);
     shared_ptr<TripPath> start_path(new TripPath(start, EST_WALK_SPEED, 
                                                  end_node, start_node));
     if (start_node == end_node)
@@ -488,7 +488,7 @@ void TripGraph::extend_path(shared_ptr<TripPath> &path,
     vector<pair<int, int> > vsp = get_service_period_ids_for_time(path->time);
 
     DEBUGPATH("Extending path at vertex %d (on %d) @ %f (walktime: %f, "
-              "routetime: %f elapsed_daysecs: %d)\n", src_id, last_route_id, path->time, 
+              "routetime: %f elapsed_daysecs: %f)\n", src_id, last_route_id, path->time, 
               path->walking_time, path->route_time, elapsed_daysecs);
     shared_ptr<TripStop> src_stop = _get_tripstop(src_id);
 
