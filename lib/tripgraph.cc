@@ -34,8 +34,11 @@ static double distance(double src_lat, double src_lng, double dest_lat,
                        double dest_lng)
 {
     // returns distance in meters
-    if (src_lat == dest_lat && src_lng == dest_lng)
+    static const double EPSILON = 0.00005;
+    
+    if ((src_lat - dest_lat) < EPSILON && (src_lng - dest_lng) < EPSILON) {
         return 0.0f;
+    }
 
     double theta = src_lng - dest_lng;
     double src_lat_radians = radians(src_lat);
