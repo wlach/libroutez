@@ -1,0 +1,17 @@
+=== Current maintainer and primary author ===
+
+William Lachance <wrlach@gmail.com>
+
+=== Contributors ===
+
+Brandon Martin Anderson <badhill@gmail.com>
+ - Core concepts of a trip planning library (in graphserver: 
+ http://graphserver.sourceforge.net)
+ - Python OSM parsing library 
+
+Peter McCurdy <petermccurdy@alumni.uwaterloo.ca>
+ - Support for delaying walking to a stop at the start of a trip.
+ 
+Jason Madigan <jason@jasonmadigan.com>
+- Some updates to the README regarding building, and updates to
+  the ruby examples.
