@@ -36,7 +36,7 @@ static double distance(double src_lat, double src_lng, double dest_lat,
     // returns distance in meters
     static const double EPSILON = 0.00005;
     
-    if ((src_lat - dest_lat) < EPSILON && (src_lng - dest_lng) < EPSILON) {
+    if (fabs(src_lat - dest_lat) < EPSILON && fabs(src_lng - dest_lng) < EPSILON) {
         return 0.0f;
     }
 
