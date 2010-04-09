@@ -35,7 +35,6 @@ struct TripHop
 
 struct WalkHop
 {
-    WalkHop() { }
     WalkHop(int32_t _dest_id, float _walktime)
     {
         dest_id = _dest_id;
