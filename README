@@ -36,17 +36,15 @@ to add a simple converter for your preferred data type.
 === Setup and use ===
 
 These instructions assume you are on a UNIX-based system (e.g. Linux or 
-MacOS X). 
+MacOS X). Windows is not currently supported.
 
 1. Download and install the following packages:
  - Boost
   - Probably any recent version should do. We need shared_ptr, unordered_set,
   and unordered_map (unordered_map.hpp is included in debian/ubuntu packages 
   libboost1.37-dev & libboost1.38-dev)
+ - Python Rtree and spatial index (http://pypi.python.org/pypi/Rtree/0.5.0)
  - Google Transit Data Feed (http://code.google.com/p/googletransitdatafeed/)
-   - As of this writing you need what's in SVN, as it has a fix that I made
-   to actually handle interpolated stops correctly. The next version after
-   1.1.9 should have my fix.
  - SWIG
    - A recentish version is desirable. I used 1.3.36.
 
