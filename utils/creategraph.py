@@ -79,11 +79,14 @@ def load_gtfs(tripgraph, sched, idmap):
           elif prevsecs > service_period_bounds[trip.service_id]:
               service_period_bounds[trip.service_id] = prevsecs
 
-          tripgraph.add_triphop(prevsecs, secs, idmap.stopmap[prevstop.stop_id],
-                                idmap.stopmap[stop.stop_id], 
-                                idmap.routemap[trip.route_id], 
-                                idmap.tripmap[trip.trip_id], 
-                                idmap.spmap[trip.service_id])
+          if prevstop.stop_id != stop.stop_id:
+              # only add triphop if we're not going to ourselves. there are
+              # some feeds (cough, cough, Halifax) which actually do this
+              tripgraph.add_triphop(prevsecs, secs, idmap.stopmap[prevstop.stop_id],
+                                    idmap.stopmap[stop.stop_id], 
+                                    idmap.routemap[trip.route_id], 
+                                    idmap.tripmap[trip.trip_id], 
+                                    idmap.spmap[trip.service_id])
         prevstop = stop
         prevsecs = secs
 
