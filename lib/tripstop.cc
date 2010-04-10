@@ -133,13 +133,13 @@ static bool sort_triphops(const TripHop &x,
 
 void TripStop::add_triphop(int32_t start_time, int32_t end_time, 
                            int32_t dest_id, int32_t route_id, int32_t trip_id,
-                           int32_t service_id)
+                           int32_t service_id, int32_t headsign_id)
 {
     if (!tdict)
         tdict = shared_ptr<ServiceDict>(new ServiceDict);
     
     (*tdict)[service_id][route_id].push_back(TripHop(start_time, end_time, 
-                                                     dest_id, trip_id));
+                                                     dest_id, trip_id, headsign_id));
     ::sort((*tdict)[service_id][route_id].begin(), 
            (*tdict)[service_id][route_id].end(), sort_triphops);
 }

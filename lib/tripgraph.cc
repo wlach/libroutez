@@ -160,11 +160,11 @@ void TripGraph::add_service_period(ServicePeriod &service_period)
 
 void TripGraph::add_triphop(int32_t start_time, int32_t end_time, 
                             int32_t src_id, int32_t dest_id, int32_t route_id, 
-                            int32_t trip_id, int32_t service_id)
+                            int32_t trip_id, int32_t service_id, int32_t headsign_id)
 {
     // will assert if src_id doesn't exist!!
     _get_tripstop(src_id)->add_triphop(start_time, end_time, dest_id, route_id, 
-                                       trip_id, service_id);
+                                       trip_id, service_id, headsign_id);
 }
 
 

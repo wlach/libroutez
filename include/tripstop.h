@@ -18,18 +18,20 @@ struct TripHop
     TripHop() { }
 
     TripHop(int32_t _start_time, int32_t _end_time, int32_t _dest_id, 
-            int32_t _trip_id)
+            int32_t _trip_id, int32_t _headsign_id)
     {
         start_time = _start_time;
         end_time = _end_time;
         dest_id = _dest_id;
         trip_id = _trip_id;
+        headsign_id = _headsign_id;
     }
 
     int32_t start_time;
     int32_t end_time;
     int32_t dest_id;
     int32_t trip_id;
+    int32_t headsign_id;
 };
 
 
@@ -60,7 +62,8 @@ struct TripStop
     void write(FILE *fp);
 
     void add_triphop(int32_t start_time, int32_t end_time, int32_t dest_id, 
-                     int32_t route_id, int32_t trip_id, int32_t service_id);
+                     int32_t route_id, int32_t trip_id, int32_t service_id,
+                     int32_t headsign_id);
     void add_walkhop(int32_t dest_id, float walktime);
     std::deque<int> get_routes(int32_t service_id);
     const TripHop * find_triphop(int time, int route_id, int32_t service_id);

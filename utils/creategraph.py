@@ -84,12 +84,23 @@ def process_gtfs(tripgraph, sched, idmap):
           if prevstop.stop_id != stop.stop_id:
               # only add triphop if we're not going to ourselves. there are
               # some feeds (cough, cough, Halifax) which actually do this
-              tripgraph.add_triphop(prevsecs, secs, 
+
+              # get a stop_headsign id, if we have a stop headsign (rare, but not
+              # unheard of)
+              headsign_id = -1
+              stop_headsign = stoptime.stop_headsign
+              if stop_headsign and len(stop_headsign) > 0:
+                  if not idmap.headsignmap.has_key(stop_headsign):
+                      idmap.headsignmap[stop_headsign] = len(idmap.headsignmap)
+                  headsign_id = idmap.headsignmap[stop_headsign]
+
+              tripgraph.add_triphop(prevsecs, secs,
                                     idmap.stopmap[prevstop.stop_id],
-                                    idmap.stopmap[stop.stop_id], 
-                                    idmap.routemap[trip.route_id], 
-                                    idmap.tripmap[trip.trip_id], 
-                                    idmap.spmap[trip.service_id])
+                                    idmap.stopmap[stop.stop_id],
+                                    idmap.routemap[trip.route_id],
+                                    idmap.tripmap[trip.trip_id],
+                                    idmap.spmap[trip.service_id],
+                                    headsign_id)
         prevstop = stop
         prevsecs = secs
 

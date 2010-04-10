@@ -23,7 +23,7 @@ class TripGraph
     void add_service_period(ServicePeriod &service_period);
     void add_triphop(int32_t start_time, int32_t end_time, int32_t src_id, 
                      int32_t dest_id, int32_t route_id, int32_t trip_id,
-                     int32_t service_id);
+                     int32_t service_id, int32_t headsign_id);
     void add_tripstop(int32_t id, TripStop::Type type, float lat, float lng);
     void add_walkhop(int32_t src_id, int32_t dest_id);
 
