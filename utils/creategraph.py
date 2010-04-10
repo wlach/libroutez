@@ -16,6 +16,7 @@ class IdMap:
         self.stopmap = {}
         self.routemap = {}
         self.tripmap = {}
+        self.headsignmap = {}
 
     def save(self, fname):
         f = open(fname, 'w')
@@ -39,6 +40,11 @@ class IdMap:
         print >> f, "Trips: {"
         for gtfs_trip_id in sorted(self.tripmap.keys()):
             print >> f, "    '%s': %s," % (gtfs_trip_id, self.tripmap[gtfs_trip_id])
+        print >> f, "}"
+
+        print >> f, "Headsigns: {"
+        for gtfs_headsign_name in sorted(self.headsignmap.keys()):
+            print >> f, "    '%s': %s," % (gtfs_headsign_name, self.headsignmap[gtfs_headsign_name])
         print >> f, "}"
 
         f.close()
