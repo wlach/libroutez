@@ -39,6 +39,11 @@ class TripGraph
     TripPath * find_path(double start, bool walkonly,
                          double src_lat, double src_lng, 
                          double dest_lat, double dest_lng);
+    TripPath * find_path(double start, bool walkonly,
+                         double src_lat, double src_lng, 
+                         double dest_lat, double dest_lng, 
+                         unsigned int &num_paths_considered);
+    
     // various internal types
     struct PathCompare
     {
@@ -68,7 +73,8 @@ class TripGraph
     std::tr1::shared_ptr<TripStop> get_nearest_stop(double lat, double lng);
 
     void extend_path(std::tr1::shared_ptr<TripPath> &path, 
-                     bool walkonly, int32_t end_id, int &num_paths_considered,
+                     bool walkonly, int32_t end_id, 
+                     unsigned int &num_paths_considered,
                      VisitedRouteMap &visited_routes, 
                      VisitedWalkMap &visited_walks, 
                      PathQueue &uncompleted_paths, PathQueue &completed_paths);
