@@ -51,7 +51,7 @@ def load_gtfs(tripgraph, sched, idmap):
         tripgraph.add_tripstop(idmap.stopmap[stop.stop_id], TripStop.GTFS, 
                                stop.stop_lat, stop.stop_lon)
 
-    for sp_id in sched.service_periods.keys():
+    for sp_id in set(map(lambda t: t.service_id, sched.GetTripList())):        
         idmap.spmap[sp_id] = len(idmap.spmap)
 
     service_period_bounds = {}
@@ -90,7 +90,7 @@ def load_gtfs(tripgraph, sched, idmap):
         prevstop = stop
         prevsecs = secs
 
-    for sp_id in sched.service_periods.keys():
+    for (sp_id, sp) in sorted(idmap.spmap.iteritems(), key=lambda sp: sp[1]):
         sp = sched.service_periods[sp_id]
         if not sp.start_date or not sp.end_date:
             continue
