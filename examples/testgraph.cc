@@ -37,15 +37,18 @@ int main(int argc, char *argv[])
     g.load(argv[1]);
 
     printf("Calculating path...\n");
+    unsigned int num_paths_considered = 0;
     TripPath *p = g.find_path(start_time, false, src_lat, src_lng, 
-                              dest_lat, dest_lng);
+                              dest_lat, dest_lng, num_paths_considered);
 
     if (p)
         print_actions(p->last_action);
     else
-        printf("Couldn't find path.\n");
+        printf("Couldn't find path.\n");    
 
     delete p;
+
+    printf("Number of paths considered: %d\n", num_paths_considered);
 
     return 0;
 }

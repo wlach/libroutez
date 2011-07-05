@@ -39,7 +39,7 @@ def get_service_period_offsets():
 @wvtest
 def tripstop():
     ts = TripStop(0, TripStop.OSM, 0.0, 0.0);
-    ts.add_triphop(500, 1000, 1, 1, 1, 0);
+    ts.add_triphop(500, 1000, 1, 1, 1, 0, 0);
     route_ids = ts.get_routes(0)
     WVPASSEQ(len(route_ids), 1)
     WVPASSEQ(route_ids[0], 1)

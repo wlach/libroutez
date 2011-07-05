@@ -30,7 +30,7 @@ WVTEST_MAIN("basic_graph_pathfinding")
     {
         ServicePeriod s(0, 0, 0, 0, 7, 0, 100, 2000, true, true, true);
         g.add_service_period(s);
-        g.add_triphop(500, 1000, 0, 1, 1, 1, 0);
+        g.add_triphop(500, 1000, 0, 1, 1, 1, 0, -1);
     }
 
     {
@@ -59,7 +59,7 @@ WVTEST_MAIN("basic_graph_saveload")
 
     ServicePeriod s(0, 1, 0, 0, 7, 0, 100, 2000, true, true, true);
     g.add_service_period(s);
-    g.add_triphop(500, 1000, 0, 1, 1, 1, 0);
+    g.add_triphop(500, 1000, 0, 1, 1, 1, 0, -1);
 
     char *tmpgraphname = tmpnam(NULL); // security issues in unit tests? bah.
     unlink(tmpgraphname);

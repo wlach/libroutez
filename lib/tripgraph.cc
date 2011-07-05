@@ -160,11 +160,11 @@ void TripGraph::add_service_period(ServicePeriod &service_period)
 
 void TripGraph::add_triphop(int32_t start_time, int32_t end_time, 
                             int32_t src_id, int32_t dest_id, int32_t route_id, 
-                            int32_t trip_id, int32_t service_id)
+                            int32_t trip_id, int32_t service_id, int32_t headsign_id)
 {
     // will assert if src_id doesn't exist!!
     _get_tripstop(src_id)->add_triphop(start_time, end_time, dest_id, route_id, 
-                                       trip_id, service_id);
+                                       trip_id, service_id, headsign_id);
 }
 
 
@@ -384,6 +384,17 @@ TripPath * TripGraph::find_path(double start, bool walkonly,
                                 double src_lat, double src_lng, 
                                 double dest_lat, double dest_lng)
 {
+    unsigned int num_paths_considered = 0;
+    return find_path(start, walkonly, src_lat, src_lng, dest_lat, dest_lng, 
+                     num_paths_considered);
+}
+
+
+TripPath * TripGraph::find_path(double start, bool walkonly,
+                                double src_lat, double src_lng, 
+                                double dest_lat, double dest_lng, 
+                                unsigned int &num_paths_considered)
+{
     PathQueue uncompleted_paths;
     PathQueue completed_paths;
         
@@ -412,8 +423,7 @@ TripPath * TripGraph::find_path(double start, bool walkonly,
         return new TripPath(*start_path);
 
     uncompleted_paths.push(start_path);
-
-    int num_paths_considered = 0;
+    num_paths_considered = 0;
 
     while (uncompleted_paths.size() > 0)
     {
@@ -459,7 +469,7 @@ shared_ptr<TripStop> TripGraph::_get_tripstop(int32_t id)
 void TripGraph::extend_path(shared_ptr<TripPath> &path,
                             bool walkonly,
                             int32_t goal_id,
-                            int &num_paths_considered,
+                            unsigned int &num_paths_considered,
                             VisitedRouteMap &visited_routes,
                             VisitedWalkMap &visited_walks,
                             PathQueue &uncompleted_paths,

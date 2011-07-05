@@ -51,6 +51,20 @@ class Way:
 
         return ret
 
+    def get_bbox(self):
+        (min_lat, min_lon, max_lat, max_lon) = (None, None, None, None)
+        for id in self.nds:
+            node = self.osm.nodes[ id ]
+            if not min_lat or node.lat < min_lat:
+                min_lat = node.lat
+            if not min_lon or node.lon < min_lon:
+                min_lon = node.lon
+            if not max_lat or node.lat > max_lat:
+                max_lat = node.lat
+            if not max_lon or node.lon > max_lon:
+                max_lon = node.lon
+        return (min_lon, min_lat, max_lon, max_lat)
+
     def get_projected_points(self, reprojection_func=lambda x,y:(x,y)):
         """nodedir is a dictionary of nodeid->node objects. If reprojection_func is None, returns unprojected points"""
         ret = []
@@ -127,7 +141,10 @@ class OSM:
 
         self.nodes = nodes
         self.ways = ways
+        self.optimize()
 
+    def optimize(self):
+        """Optimize ways for building graph."""
         #count times each node is used
         node_histogram = dict.fromkeys( self.nodes.keys(), 0 )
         print "Counting and pruning ways"

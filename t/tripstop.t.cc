@@ -9,8 +9,8 @@ using namespace tr1;
 WVTEST_MAIN("save/load")
 {
     TripStop t1(1, TripStop::OSM, 44.5f, 54.4f);
-    t1.add_triphop(500, 550, 0, 0, 0, 0);
-    t1.add_triphop(550, 600, 0, 0, 0, 0);
+    t1.add_triphop(500, 550, 0, 0, 0, 0, -1);
+    t1.add_triphop(550, 600, 0, 0, 0, 0, -1);
 
     char *tmpname = tmpnam(NULL); // security issues in unit tests? bah.
     unlink(tmpname);
@@ -39,10 +39,10 @@ WVTEST_MAIN("save/load")
 WVTEST_MAIN("get_multiple_triphops")
 {
     TripStop t;
-    t.add_triphop(500, 550, 0, 0, 0, 0);
-    t.add_triphop(550, 600, 0, 0, 0, 0);
-    t.add_triphop(600, 650, 0, 0, 0, 0);
-    t.add_triphop(600, 650, 0, 0, 0, 1);
+    t.add_triphop(500, 550, 0, 0, 0, 0, -1);
+    t.add_triphop(550, 600, 0, 0, 0, 0, -1);
+    t.add_triphop(600, 650, 0, 0, 0, 0, -1);
+    t.add_triphop(600, 650, 0, 0, 0, 1, -1);
 
     // Ask for different amounts...
 

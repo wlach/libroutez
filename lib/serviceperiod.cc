@@ -6,12 +6,12 @@
 using namespace std;
 
 
-static time_t get_time_t(int tm_mday, int tm_mon, int tm_year)
+static time_t get_time_t(int tm_mday, int tm_mon, int tm_year, int tm_sec, int tm_min, int tm_hour)
 {
     struct tm t;
-    t.tm_sec = 0;
-    t.tm_min = 0;
-    t.tm_hour = 0;
+    t.tm_sec = tm_sec;
+    t.tm_min = tm_min;
+    t.tm_hour = tm_hour;
     t.tm_mday = tm_mday;
     t.tm_mon = tm_mon;
     t.tm_year = tm_year;
@@ -49,8 +49,8 @@ ServicePeriod::ServicePeriod(int32_t _id, int32_t _start_mday,
 {
     id = _id;
 
-    start_time = get_time_t(_start_mday, _start_mon, _start_year);
-    end_time = get_time_t(_end_mday, _end_mon, _end_year);
+    start_time = get_time_t(_start_mday, _start_mon, _start_year, 0, 0, 0);
+    end_time = get_time_t(_end_mday, _end_mon, _end_year, 23, 59, 59);
 
     duration = _duration;
     weekday = _weekday; 
