@@ -60,6 +60,10 @@ def process_gtfs(tripgraph, sched, idmap):
                                stop.stop_lat, stop.stop_lon)
 
     for sp_id in set(map(lambda t: t.service_id, sched.GetTripList())):        
+        sp = sched.service_periods[sp_id]
+        if not sp.GetDateRange():
+            print "WARNING: Service period has no date range. Skipping."
+            continue
         idmap.spmap[sp_id] = len(idmap.spmap)
 
     service_period_bounds = {}
@@ -112,10 +116,10 @@ def process_gtfs(tripgraph, sched, idmap):
 
     for (sp_id, sp) in sorted(idmap.spmap.iteritems(), key=lambda sp: sp[1]):
         sp = sched.service_periods[sp_id]
-        if not sp.start_date or not sp.end_date:
+        if sp.GetDateRange() == (None, None):
             continue
-        tm_start = time.strptime(sp.start_date, "%Y%m%d")
-        tm_end = time.strptime(sp.end_date, "%Y%m%d")
+        tm_start = time.strptime(sp.GetDateRange()[0], "%Y%m%d")
+        tm_end = time.strptime(sp.GetDateRange()[1], "%Y%m%d")
         # FIXME: currently assume weekday service is uniform, i.e. 
         # monday service == mon-fri service
         if service_period_bounds.has_key(sp_id):
