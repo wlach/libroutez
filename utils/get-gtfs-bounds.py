@@ -1,6 +1,7 @@
 #!/usr/bin/python
  
 import zipfile
+import csv
 from optparse import OptionParser
  
 parser = OptionParser()
@@ -9,10 +10,11 @@ parser.add_option("-m", action="store_true", dest="minimal")
  
 
 zip = zipfile.ZipFile(args[0], mode='r')
-stoptext = zip.read("stops.txt")
-lines = stoptext.split('\n')
 
-descriptors = lines[0].split(',')
+stoptext = zip.open("stops.txt")
+lines = csv.reader(stoptext)
+
+descriptors = lines.next()
 (stop_lat_descriptor, stop_lng_descriptor) = (-1, -1)
 id = 0
 for descriptor in descriptors:
@@ -21,10 +23,9 @@ for descriptor in descriptors:
     elif descriptor == "stop_lon":
         stop_lng_descriptor = id
     id+=1
- 
+
 (min_lat, min_lng, max_lat, max_lng) = (0.0, 0.0, 0.0, 0.0)
-for line in lines[1:-2:]:
-    stop_info = line.split(',')
+for stop_info in lines:
     (lat, lng) = (float(stop_info[stop_lat_descriptor]),
                   float(stop_info[stop_lng_descriptor]))
     if min_lat == 0.0 or lat < min_lat:
